@@ -1,0 +1,2 @@
+﻿# Cross-run rollup. One row per (run_id, checkpoint_step, eval_set).
+run_id,checkpoint_step,eval_set,pl_lddt,ip_lddt,icp_lddt,mean_rmsd,n_complexes,notes

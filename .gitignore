@@ -1,0 +1,56 @@
+# --- data / weights / structures: never commit ------------------------------
+# anchored to repo root so they don't swallow src/data, src/weights, etc.
+/data/
+/weights/
+*.pt
+*.ckpt
+*.zip
+*.cif
+*.pdb
+*.a3m
+*.sdf
+*.mmcif
+*.npz
+
+# --- secrets / keys ----------------------------------------------------------
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+team-*
+id_rsa*
+id_ed25519*
+bitwarden_*
+
+# --- per-run artefacts (logs ok, checkpoints/structures not) -----------------
+results/runs/*/checkpoints/
+results/runs/*/predictions/
+results/runs/*/*.cif
+results/runs/*/*.pdb
+
+# --- python / IDE noise ------------------------------------------------------
+__pycache__/
+*.pyc
+*.pyo
+.ipynb_checkpoints/
+.venv/
+venv/
+.env.local
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+
+# --- OS / editor -------------------------------------------------------------
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.vscode/
+!.vscode/settings.json.example
+
+# --- per-user Claude Code config (not team config) ---------------------------
+.claude/settings.local.json
+
+# --- large org slide deck (sourceable, not worth carrying in git) ------------
+background_info/*.pptx

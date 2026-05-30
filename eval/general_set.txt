@@ -1,0 +1,18 @@
+# eval/general_set.txt
+#
+# External no-regression set — non-PDE10A protein–ligand complexes deposited
+# after the OF3 training cutoff (post-2021), used to measure whether
+# fine-tuning has degraded OF3's general behaviour beyond what the PDE10A
+# IP-LDDT proxy can detect.
+#
+# DAY-1 PROXY (do not need this file): IP LDDT on the held-out 17 PDE10A
+# eval complexes. The external set is only built when D0a has confirmed the
+# eval pipeline produces sensible numbers — pulling these in costs an a3m
+# MSA generation pass per complex.
+#
+# Populate one PDB ID per line (uppercase). Suggested sourcing:
+# - PoseBusters V2 entries deposited >= 2022, no PDE family
+# - At least one cofactor-bound (ATP/GTP) and one peptide-ligand entry
+# - 5-8 entries is enough; more dilutes the signal in the time budget
+#
+# ----- PDB IDs below this line, one per line -----
