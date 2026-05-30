@@ -1,0 +1,504 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>OF3 × PDE10A — Planned Options</title>
+<style>
+  :root {
+    --bg:        #f7f7f5;
+    --panel:    #ffffff;
+    --ink:      #1a1a1a;
+    --muted:    #6b6b6b;
+    --line:     #e3e3e0;
+    --accent:   #2b6cb0;
+    --good:     #2f7d32;
+    --warn:     #b45309;
+    --bad:      #b91c1c;
+    --d0a:      #2b6cb0;
+    --d0b:      #4338ca;
+    --d1:       #0f766e;
+    --d2:       #b45309;
+    --d3:       #6b21a8;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 15px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI",
+           Roboto, "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 32px 24px 96px; }
+  header.hero {
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 24px;
+    margin-bottom: 28px;
+  }
+  header.hero h1 {
+    font-size: 28px; margin: 0 0 6px 0; letter-spacing: -0.01em;
+  }
+  header.hero .sub {
+    color: var(--muted); font-size: 14px;
+  }
+  header.hero blockquote {
+    border-left: 3px solid var(--accent);
+    background: #fff;
+    padding: 12px 16px;
+    margin: 18px 0 0 0;
+    font-style: italic;
+    color: #333;
+    border-radius: 0 6px 6px 0;
+  }
+  .facts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin: 22px 0 32px;
+  }
+  .fact {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 10px 12px;
+  }
+  .fact .k { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .fact .v { font-weight: 600; font-size: 14px; margin-top: 2px; }
+
+  h2.section {
+    font-size: 18px; letter-spacing: -0.005em;
+    margin: 40px 0 14px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--line);
+  }
+  h2.section span.tag {
+    color: var(--muted); font-weight: 400; font-size: 13px; margin-left: 8px;
+  }
+
+  /* Cards for the 5 directions */
+  .lanes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 16px;
+  }
+  .lane {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 18px 18px 16px;
+    position: relative;
+    display: flex; flex-direction: column;
+  }
+  .lane::before {
+    content: ""; position: absolute; left: 0; top: 0; bottom: 0;
+    width: 5px; border-radius: 8px 0 0 8px;
+  }
+  .lane.d0a::before { background: var(--d0a); }
+  .lane.d0b::before { background: var(--d0b); }
+  .lane.d1::before  { background: var(--d1); }
+  .lane.d2::before  { background: var(--d2); }
+  .lane.d3::before  { background: var(--d3); }
+
+  .lane .name {
+    font-size: 12px; font-weight: 700; letter-spacing: 0.05em;
+    text-transform: uppercase; color: var(--muted);
+  }
+  .lane.d0a .name { color: var(--d0a); }
+  .lane.d0b .name { color: var(--d0b); }
+  .lane.d1  .name { color: var(--d1); }
+  .lane.d2  .name { color: var(--d2); }
+  .lane.d3  .name { color: var(--d3); }
+
+  .lane h3 {
+    margin: 4px 0 4px 0; font-size: 17px; letter-spacing: -0.005em;
+  }
+  .lane .one-liner {
+    color: var(--muted); font-size: 13px; margin-bottom: 12px;
+  }
+  .lane dl {
+    margin: 0; padding: 0;
+    display: grid;
+    grid-template-columns: 105px 1fr;
+    gap: 4px 12px;
+    font-size: 13.5px;
+  }
+  .lane dt {
+    color: var(--muted); font-weight: 600;
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em;
+    padding-top: 3px;
+  }
+  .lane dd { margin: 0; }
+  .lane .cost {
+    margin-top: 12px; padding-top: 10px;
+    border-top: 1px dashed var(--line);
+    font-size: 12.5px; color: var(--muted);
+  }
+  .lane .cost b { color: var(--ink); }
+
+  /* Decision gates */
+  .gates {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 14px;
+  }
+  .gate {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 16px;
+    border-left: 5px solid var(--accent);
+  }
+  .gate.green  { border-left-color: var(--good); }
+  .gate.yellow { border-left-color: var(--warn); }
+  .gate.red    { border-left-color: var(--bad); }
+  .gate .if   { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+  .gate .cond { font-size: 14.5px; font-weight: 600; margin: 4px 0 10px; }
+  .gate .then { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+  .gate .act  { font-size: 14px; margin-top: 4px; }
+
+  /* Timeline */
+  .timeline {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 16px 18px;
+  }
+  .timeline .row {
+    display: grid;
+    grid-template-columns: 90px 1fr;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 0;
+  }
+  .timeline .row + .row { border-top: 1px dashed var(--line); }
+  .timeline .label { font-size: 12px; color: var(--muted); font-weight: 600; }
+  .timeline .bar {
+    position: relative; height: 22px; background: #f1f1ee; border-radius: 4px;
+  }
+  .timeline .bar span {
+    position: absolute; top: 0; bottom: 0;
+    border-radius: 4px;
+    font-size: 11px; color: white;
+    padding: 0 8px; line-height: 22px; white-space: nowrap;
+    overflow: hidden; text-overflow: ellipsis;
+  }
+  .timeline .scale {
+    margin-top: 8px;
+    display: grid; grid-template-columns: repeat(6, 1fr);
+    font-size: 11px; color: var(--muted);
+    padding-left: 102px;
+  }
+
+  /* Hyperparam grid */
+  table.cfg {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    overflow: hidden;
+    font-size: 13px;
+  }
+  table.cfg th, table.cfg td {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--line);
+    text-align: left;
+  }
+  table.cfg th {
+    background: #f1f1ee;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+    font-weight: 700;
+  }
+  table.cfg tbody tr:last-child td { border-bottom: 0; }
+  table.cfg td.lane-cell { font-weight: 700; }
+  .pill {
+    display: inline-block;
+    padding: 1px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    color: white;
+  }
+  .pill.d0a { background: var(--d0a); }
+  .pill.d0b { background: var(--d0b); }
+  .pill.d1  { background: var(--d1); }
+  .pill.d2  { background: var(--d2); }
+  .pill.d3  { background: var(--d3); }
+
+  /* Metrics legend */
+  .metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 12px;
+  }
+  .metric {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 14px;
+  }
+  .metric h4 {
+    margin: 0 0 4px 0; font-size: 14px;
+  }
+  .metric .role {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em;
+    color: var(--muted); font-weight: 700; margin-bottom: 6px;
+  }
+  .metric p { margin: 0; font-size: 13px; color: #333; }
+
+  footer {
+    margin-top: 60px;
+    color: var(--muted);
+    font-size: 12px;
+    border-top: 1px solid var(--line);
+    padding-top: 16px;
+  }
+  code, kbd { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: 12.5px; }
+
+  @media print {
+    .wrap { max-width: none; padding: 8mm; }
+    .lane, .gate, .metric, .timeline, table.cfg { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <h1>OpenFold3 × PDE10A — planned options</h1>
+  <div class="sub">Apheris AI-for-Co-folding hackathon · Team 4 · single NVIDIA H100</div>
+  <blockquote>
+    Can ~10 liganded PDE10A structures meaningfully improve OF3 pose accuracy
+    on held-out PDE10A complexes — without degrading general performance?
+  </blockquote>
+</header>
+
+<div class="facts">
+  <div class="fact"><div class="k">Target</div><div class="v">human PDE10A</div></div>
+  <div class="fact"><div class="k">Base model</div><div class="v">OpenFold3 (4.0.0)</div></div>
+  <div class="fact"><div class="k">Train set</div><div class="v">10 complexes</div></div>
+  <div class="fact"><div class="k">Eval set</div><div class="v">17 held-out</div></div>
+  <div class="fact"><div class="k">Hardware</div><div class="v">1× H100</div></div>
+  <div class="fact"><div class="k">Reference run</div><div class="v">~20 h, ~350 steps</div></div>
+  <div class="fact"><div class="k">Data origin</div><div class="v">Roche 2022, XChem-style 5S* fragments</div></div>
+  <div class="fact"><div class="k">Monitored metric</div><div class="v">PL LDDT (lddt_inter_protein_ligand)</div></div>
+</div>
+
+
+<h2 class="section">Five lanes <span class="tag">D0a gates everything else</span></h2>
+
+<div class="lanes">
+
+  <div class="lane d0a">
+    <div class="name">D0a · fast directional probe</div>
+    <h3>Short ~80–120 step fine-tune</h3>
+    <div class="one-liner">Day-1 signal. Drives every gating decision below.</div>
+    <dl>
+      <dt>Hypothesis</dt><dd>A short FT can tell us in hours whether PL LDDT moves the right way and whether IP LDDT collapses — without burning 20 h.</dd>
+      <dt>Change</dt><dd>Reference hyperparams (LR 3e-4, EMA 0.99, warmup 50) but only ~80–120 steps and dense checkpoints (<code>num_gradient_steps_per_epoch: 4</code>).</dd>
+      <dt>Measure</dt><dd>PL LDDT &amp; IP LDDT on the 17 held-out at every checkpoint.</dd>
+      <dt>Worked if</dt><dd>PL LDDT trend is up, IP LDDT doesn't fall.</dd>
+      <dt>Falsified if</dt><dd>PL LDDT flat / IP LDDT degrades by &gt;1 lDDT — re-route per gates.</dd>
+    </dl>
+    <div class="cost"><b>Cost:</b> ~3–6 h on the H100 · <b>Config:</b> <code>configs/d0a_short.json</code></div>
+  </div>
+
+  <div class="lane d0b">
+    <div class="name">D0b · unattended reference</div>
+    <h3>Reproduce the published ~350-step run</h3>
+    <div class="one-liner">Anchors our numbers to Apheris. <b>Does not gate D1 or any pivot.</b></div>
+    <dl>
+      <dt>Hypothesis</dt><dd>The published recipe gives a directionally correct reference checkpoint to compare against.</dd>
+      <dt>Change</dt><dd>Nothing vs the published protocol — LR 3e-4, EMA 0.99, ~350 steps, no templates, baseline MSAs.</dd>
+      <dt>Measure</dt><dd>Same as D0a, plus DockQ on the PL interface for the final ckpt.</dd>
+      <dt>Worked if</dt><dd>PL LDDT &gt; base on at least 10/17 eval complexes.</dd>
+      <dt>Falsified if</dt><dd>No PL LDDT gain anywhere on the curve → premise (10 structures help) fails for the reference recipe.</dd>
+    </dl>
+    <div class="cost"><b>Cost:</b> ~20 h, unattended · <b>Config:</b> <code>configs/reference.json</code></div>
+  </div>
+
+  <div class="lane d1">
+    <div class="name">D1 · regularization map</div>
+    <h3>EMA × LR grid around reference</h3>
+    <div class="one-liner">Cheap, characterises the stability window of the recipe.</div>
+    <dl>
+      <dt>Hypothesis</dt><dd>The published EMA=0.99 / LR=3e-4 point is unlikely to be optimal for this exact split — a small grid will reveal a sweet spot or robustness.</dd>
+      <dt>Change</dt><dd>Hold seeds, warmup, crop fixed; vary <code>ema_decay</code> ∈ {0.95, 0.995} and <code>learning_rate</code> ∈ {1e-4, 6e-4}.</dd>
+      <dt>Measure</dt><dd>PL LDDT &amp; IP LDDT curves per cell, side-by-side.</dd>
+      <dt>Worked if</dt><dd>Any cell beats reference on PL LDDT without losing &gt;1 lDDT on IP.</dd>
+      <dt>Falsified if</dt><dd>All cells track within noise → recipe is robust, data is the bottleneck (pivot to D2).</dd>
+    </dl>
+    <div class="cost"><b>Cost:</b> 3–4 runs × ~8 h ≈ 24–32 h · <b>Configs:</b> <code>configs/d1_*.json</code></div>
+  </div>
+
+  <div class="lane d2">
+    <div class="name">D2 · similarity-based augmentation</div>
+    <h3>+20–40 retrieved similar complexes</h3>
+    <div class="one-liner">High upside. Matches organizers' graph-similarity hint.</div>
+    <dl>
+      <dt>Hypothesis</dt><dd>10 is too few; adding chemotypically or structurally similar liganded complexes will improve transfer more than any hyperparam tweak.</dd>
+      <dt>Change</dt><dd>Retrieve ~20–40 augmentation complexes (protein-side via Foldseek/PDE family; ligand-side via Tanimoto + the rest of the XChem 5S* fragments) and mix 2:1 with the original 10.</dd>
+      <dt>Measure</dt><dd>Per-eval-complex PL LDDT vs ligand-similarity-to-train.</dd>
+      <dt>Worked if</dt><dd>Beats the best D1 cell AND gains are larger on chemotypically distant eval points.</dd>
+      <dt>Falsified if</dt><dd>Only helps similar-to-augmentation points and hurts the distant ones — publishable negative result on sample efficiency.</dd>
+    </dl>
+    <div class="cost"><b>Real bottleneck is MSA generation</b> for the augmentation complexes, not training. Start that pipeline on the VM's CPU resources as soon as D0a's signal looks promising.<br><b>Train cost:</b> ~15–20 h · <b>Config:</b> <code>configs/d2_augmented.json</code></div>
+  </div>
+
+  <div class="lane d3">
+    <div class="name">D3 · generalisation guard</div>
+    <h3>Pareto plot, free on every checkpoint</h3>
+    <div class="one-liner">Always-on safety lane. No new training cost.</div>
+    <dl>
+      <dt>Hypothesis</dt><dd>Fine-tuning trades general accuracy for PDE10A accuracy somewhere; we want the curve, not a binary claim.</dd>
+      <dt>Change</dt><dd>Nothing — every D0/D1/D2 checkpoint is also evaluated on the no-regression proxy.</dd>
+      <dt>Day-1 proxy</dt><dd><b>IP LDDT on the held-out 17</b>. No external set needed for the day-1 picture.</dd>
+      <dt>Day-2 proxy</dt><dd>Add a 5–8 complex non-PDE10A PoseBusters-style set. Pulling these in costs an MSA pass each — defer until pipeline is solid.</dd>
+      <dt>Worked if</dt><dd>One checkpoint is strictly Pareto-better than base OF3 on (PL LDDT, IP LDDT delta).</dd>
+    </dl>
+    <div class="cost"><b>Cost:</b> ~free · <b>Output:</b> a Pareto plot for the presentation.</div>
+  </div>
+
+</div>
+
+
+<h2 class="section">Decision gates <span class="tag">Read off D0a, not D0b</span></h2>
+
+<div class="gates">
+  <div class="gate green">
+    <div class="if">If D0a shows</div>
+    <div class="cond">PL LDDT improving &amp; IP LDDT holding</div>
+    <div class="then">Then do</div>
+    <div class="act">Launch the D1 grid sequentially and queue D0b unattended. D3 collects evidence on every checkpoint.</div>
+  </div>
+  <div class="gate yellow">
+    <div class="if">If D0a shows</div>
+    <div class="cond">PL LDDT flat</div>
+    <div class="then">Then do</div>
+    <div class="act">Skip D1. Data is the bottleneck — start MSA generation for D2 augmentation complexes immediately.</div>
+  </div>
+  <div class="gate red">
+    <div class="if">If D0a shows</div>
+    <div class="cond">IP LDDT degrading materially</div>
+    <div class="then">Then do</div>
+    <div class="act">Run <code>d1_ema_high.json</code> and <code>d1_lr_low.json</code> first to find the regularisation that retains base-model quality.</div>
+  </div>
+</div>
+
+
+<h2 class="section">Schedule on a single H100 <span class="tag">approximate, hours from start</span></h2>
+
+<div class="timeline" id="tl">
+  <div class="row">
+    <div class="label">D0a probe</div>
+    <div class="bar"><span style="left:0;width:18%;background:var(--d0a)">~5 h short FT</span></div>
+  </div>
+  <div class="row">
+    <div class="label">D0b reference</div>
+    <div class="bar"><span style="left:18%;width:60%;background:var(--d0b)">~20 h unattended reference run</span></div>
+  </div>
+  <div class="row">
+    <div class="label">D1 cells</div>
+    <div class="bar"><span style="left:18%;width:24%;background:var(--d1);opacity:0.65">~8 h interleaved per cell (×3–4)</span></div>
+  </div>
+  <div class="row">
+    <div class="label">D2 augmented</div>
+    <div class="bar"><span style="left:78%;width:22%;background:var(--d2)">~15–20 h on augmented data</span></div>
+  </div>
+  <div class="row">
+    <div class="label">D3 eval</div>
+    <div class="bar"><span style="left:0;width:100%;background:var(--d3);opacity:0.35;color:#1a1a1a">free, on every checkpoint</span></div>
+  </div>
+  <div class="scale">
+    <div>0 h</div><div>~6 h</div><div>~12 h</div><div>~18 h</div><div>~24 h</div><div>~30+ h</div>
+  </div>
+</div>
+
+
+<h2 class="section">Hyperparameter configs <span class="tag">/configs/*.json</span></h2>
+
+<table class="cfg">
+  <thead>
+    <tr>
+      <th>Lane</th><th>File</th><th>LR</th><th>EMA</th><th>Warmup</th><th>Crop</th>
+      <th>Max time</th><th>Grad steps / epoch</th><th>Purpose</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td class="lane-cell"><span class="pill d0a">D0a</span></td><td><code>d0a_short.json</code></td><td>3e-4</td><td>0.99</td><td>50</td><td>384</td><td>6 h</td><td>4 (dense)</td><td>Day-1 directional signal.</td></tr>
+    <tr><td class="lane-cell"><span class="pill d0b">D0b</span></td><td><code>reference.json</code></td><td>3e-4</td><td>0.99</td><td>50</td><td>384</td><td>24 h</td><td>8</td><td>Published Apheris recipe; unattended anchor.</td></tr>
+    <tr><td class="lane-cell"><span class="pill d1">D1</span></td><td><code>d1_ema_low.json</code></td><td>3e-4</td><td>0.95</td><td>50</td><td>384</td><td>8 h</td><td>8</td><td>Less anchoring to base — overfit boundary.</td></tr>
+    <tr><td class="lane-cell"><span class="pill d1">D1</span></td><td><code>d1_ema_high.json</code></td><td>3e-4</td><td>0.995</td><td>50</td><td>384</td><td>8 h</td><td>8</td><td>More anchoring — safer, smaller gain expected.</td></tr>
+    <tr><td class="lane-cell"><span class="pill d1">D1</span></td><td><code>d1_lr_low.json</code></td><td>1e-4</td><td>0.99</td><td>50</td><td>384</td><td>8 h</td><td>8</td><td>Stability — same shape, slower.</td></tr>
+    <tr><td class="lane-cell"><span class="pill d1">D1</span></td><td><code>d1_lr_high.json</code></td><td>6e-4</td><td>0.99</td><td>50</td><td>384</td><td>8 h</td><td>8</td><td>Faster movement — may overshoot.</td></tr>
+    <tr><td class="lane-cell"><span class="pill d2">D2</span></td><td><code>d2_augmented.json</code></td><td>3e-4</td><td>0.99</td><td>50</td><td>384</td><td>20 h</td><td>8</td><td>Same recipe, augmented dataset.</td></tr>
+  </tbody>
+</table>
+
+
+<h2 class="section">Metrics legend <span class="tag">what each number means</span></h2>
+
+<div class="metrics">
+  <div class="metric">
+    <div class="role">Pose quality · headline</div>
+    <h4>PL LDDT</h4>
+    <p>ApherisFold's <code>lddt_inter_protein_ligand</code> — literature
+       LDDT-PLI. Scores ligand–protein interface contacts in [0,1] with a
+       post-CASP15 penalty for false contacts. Default monitored metric.</p>
+  </div>
+  <div class="metric">
+    <div class="role">Protein quality · safety</div>
+    <h4>IP LDDT</h4>
+    <p>Intra-protein LDDT. Day-1 no-regression proxy — if this drops on the
+       17 held-out, the model has degraded on the protein side itself.</p>
+  </div>
+  <div class="metric">
+    <div class="role">Interface · monomer caveat</div>
+    <h4>ICP LDDT</h4>
+    <p>Inter-chain protein LDDT. Likely 0 or NaN on monomeric PDE10A —
+       confirm on first run, don't read it as a signal otherwise.</p>
+  </div>
+  <div class="metric">
+    <div class="role">Pose · presentation</div>
+    <h4>Pose RMSD &amp; DockQ</h4>
+    <p>Headline numbers for the deck. RMSD is noisy on small fragments —
+       use PL LDDT for early stopping, RMSD/DockQ for storytelling.</p>
+  </div>
+</div>
+
+
+<h2 class="section">Win condition <span class="tag">what we'd show in the presentation</span></h2>
+
+<div class="lanes">
+  <div class="lane d0a">
+    <div class="name">Result · quantitative</div>
+    <h3>One checkpoint Pareto-better than base</h3>
+    <div class="one-liner">PL LDDT up on ≥10/17 eval complexes, IP LDDT delta within noise.</div>
+  </div>
+  <div class="lane d2">
+    <div class="name">Result · narrative</div>
+    <h3>What falsified what</h3>
+    <div class="one-liner">A clean paragraph explaining which of D1/D2 produced the gain, plus the negative results we collected.</div>
+  </div>
+  <div class="lane d3">
+    <div class="name">Result · visual</div>
+    <h3>Base vs FT overlay on 5SH8</h3>
+    <div class="one-liner">The blog's anecdote — fine-tuned model "combined 5SDY + 5SI7" — is a strong candidate for the demo overlay.</div>
+  </div>
+</div>
+
+
+<footer>
+  Plan file: <code>~/.claude/plans/we-re-at-a-hackathon-parallel-quilt.md</code> ·
+  Repo memory: <code>CLAUDE.md</code>, <code>memory.md</code> ·
+  Configs: <code>configs/</code> · Scripts: <code>scripts/</code>.
+  Generated for Team 4 by Claude Code (Opus 4.7).
+</footer>
+
+</div>
+</body>
+</html>
