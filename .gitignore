@@ -12,6 +12,15 @@
 *.mmcif
 *.npz
 
+# --- curated dataset for the FT run is intentionally tracked -----------------
+# 44 train + 8 eval CIF+a3m pairs (the rebalanced split sent to OF3).
+# Override the *.cif / *.a3m globals for this one directory only.
+!dataset/
+!dataset/**/*.cif
+!dataset/**/*.a3m
+!dataset/**/*.json
+!dataset/**/*.md
+
 # --- secrets / keys ----------------------------------------------------------
 .env
 .env.*
