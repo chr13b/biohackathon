@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PDE10A UMAP — How It Works</title>
+  <style>
+    :root {
+      --blue:   #2b6cb0;
+      --orange: #c05621;
+      --gray:   #718096;
+      --light:  #f7fafc;
+      --border: #e2e8f0;
+      --green:  #276749;
+      --red:    #c53030;
+      --text:   #1a202c;
+      --muted:  #4a5568;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background: #fff;
+      color: var(--text);
+      line-height: 1.65;
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 48px 32px;
+    }
+    h1 { font-size: 2rem; font-weight: 700; margin-bottom: 6px; }
+    h2 { font-size: 1.2rem; font-weight: 700; color: var(--blue); margin: 40px 0 12px; border-left: 4px solid var(--blue); padding-left: 12px; }
+    h3 { font-size: 1rem; font-weight: 600; margin: 18px 0 6px; }
+    p  { color: var(--muted); margin-bottom: 12px; }
+    .subtitle { color: var(--muted); font-size: 1rem; margin-bottom: 40px; }
+
+    /* ── pipeline ── */
+    .pipeline {
+      display: flex;
+      align-items: stretch;
+      gap: 0;
+      margin: 28px 0 40px;
+      overflow-x: auto;
+    }
+    .step {
+      flex: 1;
+      min-width: 130px;
+      background: var(--light);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 12px;
+      text-align: center;
+      position: relative;
+    }
+    .step + .step { margin-left: 0; }
+    .arrow {
+      display: flex;
+      align-items: center;
+      color: var(--gray);
+      font-size: 1.4rem;
+      padding: 0 6px;
+      flex-shrink: 0;
+    }
+    .step-icon { font-size: 1.8rem; margin-bottom: 6px; }
+    .step-title { font-weight: 700; font-size: 0.82rem; color: var(--text); }
+    .step-sub   { font-size: 0.72rem; color: var(--muted); margin-top: 4px; }
+    .step.highlight { border-color: var(--blue); background: #ebf4ff; }
+
+    /* ── feature table ── */
+    table { width: 100%; border-collapse: collapse; margin: 16px 0 28px; font-size: 0.88rem; }
+    th { background: var(--blue); color: #fff; padding: 9px 14px; text-align: left; font-weight: 600; }
+    td { padding: 8px 14px; border-bottom: 1px solid var(--border); color: var(--muted); vertical-align: top; }
+    tr:nth-child(even) td { background: var(--light); }
+    td:first-child { font-weight: 600; color: var(--text); white-space: nowrap; }
+
+    /* ── code ── */
+    pre {
+      background: #1a202c;
+      color: #e2e8f0;
+      border-radius: 8px;
+      padding: 18px 20px;
+      font-size: 0.82rem;
+      overflow-x: auto;
+      margin: 12px 0 24px;
+      line-height: 1.6;
+    }
+    code { font-family: "Fira Code", "Cascadia Code", monospace; }
+    .kw  { color: #90cdf4; }
+    .fn  { color: #fbd38d; }
+    .cm  { color: #718096; font-style: italic; }
+    .st  { color: #9ae6b4; }
+    .nm  { color: #feb2b2; }
+
+    /* ── callout boxes ── */
+    .callout {
+      border-left: 4px solid var(--blue);
+      background: #ebf4ff;
+      padding: 14px 18px;
+      border-radius: 0 8px 8px 0;
+      margin: 16px 0 28px;
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+    .callout.warn  { border-color: var(--orange); background: #fff8f0; }
+    .callout.green { border-color: var(--green);  background: #f0fff4; }
+    .callout strong { color: var(--text); }
+
+    /* ── graph SVG illustration ── */
+    .fig { text-align: center; margin: 24px 0; }
+    .fig svg { max-width: 100%; }
+    .fig figcaption { font-size: 0.8rem; color: var(--gray); margin-top: 8px; }
+
+    /* ── umap image ── */
+    .umap-img {
+      width: 100%;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      margin: 16px 0 8px;
+    }
+    .img-caption { font-size: 0.8rem; color: var(--gray); text-align: center; margin-bottom: 28px; }
+
+    /* ── key findings ── */
+    .findings { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0 32px; }
+    .finding {
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 18px;
+    }
+    .finding-num { font-size: 2rem; font-weight: 800; color: var(--blue); line-height: 1; }
+    .finding-label { font-size: 0.8rem; color: var(--muted); margin-top: 4px; }
+    .finding-detail { font-size: 0.83rem; color: var(--muted); margin-top: 8px; }
+
+    footer { margin-top: 60px; border-top: 1px solid var(--border); padding-top: 20px; font-size: 0.8rem; color: var(--gray); }
+  </style>
+</head>
+<body>
+
+<h1>PDE10A Structural Similarity — UMAP</h1>
+<p class="subtitle">How 359 crystal structures of the same protein are embedded into 2D using contact-graph features</p>
+
+<!-- ── PIPELINE ── -->
+<h2>Pipeline overview</h2>
+<div class="pipeline">
+  <div class="step">
+    <div class="step-icon">🗂️</div>
+    <div class="step-title">CIF file</div>
+    <div class="step-sub">mmCIF from PDB<br/>one per structure</div>
+  </div>
+  <div class="arrow">→</div>
+  <div class="step">
+    <div class="step-icon">⚛️</div>
+    <div class="step-title">Cα extraction</div>
+    <div class="step-sub">~310–1278 atoms<br/>per structure</div>
+  </div>
+  <div class="arrow">→</div>
+  <div class="step highlight">
+    <div class="step-icon">🕸️</div>
+    <div class="step-title">Contact graph</div>
+    <div class="step-sub">8 Å cutoff<br/>residues as nodes</div>
+  </div>
+  <div class="arrow">→</div>
+  <div class="step highlight">
+    <div class="step-icon">📐</div>
+    <div class="step-title">Graph features</div>
+    <div class="step-sub">19-dim vector<br/>per structure</div>
+  </div>
+  <div class="arrow">→</div>
+  <div class="step">
+    <div class="step-icon">⚖️</div>
+    <div class="step-title">Normalise</div>
+    <div class="step-sub">StandardScaler<br/>zero mean, unit var</div>
+  </div>
+  <div class="arrow">→</div>
+  <div class="step highlight">
+    <div class="step-icon">🗺️</div>
+    <div class="step-title">UMAP</div>
+    <div class="step-sub">386 → 2 dims<br/>k=15 neighbours</div>
+  </div>
+</div>
+
+<!-- ── STEP 1: CIF → COORDS ── -->
+<h2>Step 1 — Extract Cα coordinates from CIF</h2>
+<p>
+  Each CIF file is an mmCIF record from the Protein Data Bank containing all heavy atoms, metadata,
+  and crystallographic information. We discard everything except the
+  <strong>alpha-carbon (Cα) atom</strong> of each residue — one point per residue in 3D space.
+  Cα atoms are sufficient to capture the protein backbone geometry.
+</p>
+<pre><code><span class="kw">import</span> gemmi
+
+<span class="kw">def</span> <span class="fn">get_ca_coords</span>(cif_path):
+    st = gemmi.<span class="fn">read_structure</span>(cif_path)
+    coords = []
+    <span class="kw">for</span> chain <span class="kw">in</span> st[<span class="nm">0</span>]:           <span class="cm"># first model only</span>
+        <span class="kw">for</span> residue <span class="kw">in</span> chain:
+            <span class="kw">for</span> atom <span class="kw">in</span> residue:
+                <span class="kw">if</span> atom.name == <span class="st">"CA"</span>:
+                    coords.<span class="fn">append</span>([atom.pos.x, atom.pos.y, atom.pos.z])
+    <span class="kw">return</span> np.<span class="fn">array</span>(coords)   <span class="cm"># shape (N_residues, 3)</span>
+</code></pre>
+<div class="callout">
+  <strong>Why Cα only?</strong> Side-chain atoms add noise without improving backbone geometry representation.
+  Using all atoms would also make structures with different conformations artificially distant.
+</div>
+
+<!-- ── STEP 2: CONTACT GRAPH ── -->
+<h2>Step 2 — Build the residue contact graph</h2>
+<p>
+  A graph G = (V, E) is constructed where each <strong>node</strong> is a residue (its Cα position)
+  and an <strong>edge</strong> connects two residues if their Cα atoms are within <strong>8 Å</strong>.
+  This threshold captures both local secondary structure contacts and non-local tertiary contacts.
+</p>
+
+<figure class="fig">
+  <svg width="480" height="200" viewBox="0 0 480 200" xmlns="http://www.w3.org/2000/svg">
+    <!-- nodes -->
+    <defs>
+      <marker id="arr" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+        <path d="M0,0 L6,3 L0,6 Z" fill="#a0aec0"/>
+      </marker>
+    </defs>
+    <!-- edges (contact) -->
+    <line x1="100" y1="100" x2="180" y2="60"  stroke="#90cdf4" stroke-width="2" opacity="0.8"/>
+    <line x1="100" y1="100" x2="200" y2="130" stroke="#90cdf4" stroke-width="2" opacity="0.8"/>
+    <line x1="180" y1="60"  x2="260" y2="80"  stroke="#90cdf4" stroke-width="2" opacity="0.8"/>
+    <line x1="200" y1="130" x2="260" y2="80"  stroke="#90cdf4" stroke-width="2" opacity="0.8"/>
+    <line x1="260" y1="80"  x2="340" y2="60"  stroke="#90cdf4" stroke-width="2" opacity="0.8"/>
+    <line x1="260" y1="80"  x2="350" y2="130" stroke="#90cdf4" stroke-width="2" opacity="0.8"/>
+    <line x1="340" y1="60"  x2="350" y2="130" stroke="#90cdf4" stroke-width="2" opacity="0.8"/>
+    <line x1="350" y1="130" x2="420" y2="100" stroke="#90cdf4" stroke-width="2" opacity="0.8"/>
+    <line x1="100" y1="100" x2="260" y2="80"  stroke="#90cdf4" stroke-width="1" opacity="0.3" stroke-dasharray="4"/>
+    <!-- no-contact dashed -->
+    <line x1="100" y1="100" x2="420" y2="100" stroke="#e2e8f0" stroke-width="1.5" stroke-dasharray="5" opacity="0.6"/>
+    <!-- nodes -->
+    <circle cx="100" cy="100" r="14" fill="#2b6cb0"/>
+    <circle cx="180" cy="60"  r="14" fill="#2b6cb0"/>
+    <circle cx="200" cy="130" r="14" fill="#2b6cb0"/>
+    <circle cx="260" cy="80"  r="14" fill="#2b6cb0"/>
+    <circle cx="340" cy="60"  r="14" fill="#2b6cb0"/>
+    <circle cx="350" cy="130" r="14" fill="#2b6cb0"/>
+    <circle cx="420" cy="100" r="14" fill="#2b6cb0"/>
+    <!-- labels -->
+    <text x="100" y="100" text-anchor="middle" dy="5" fill="white" font-size="11" font-weight="bold">Cα</text>
+    <text x="180" y="60"  text-anchor="middle" dy="5" fill="white" font-size="11" font-weight="bold">Cα</text>
+    <text x="200" y="130" text-anchor="middle" dy="5" fill="white" font-size="11" font-weight="bold">Cα</text>
+    <text x="260" y="80"  text-anchor="middle" dy="5" fill="white" font-size="11" font-weight="bold">Cα</text>
+    <text x="340" y="60"  text-anchor="middle" dy="5" fill="white" font-size="11" font-weight="bold">Cα</text>
+    <text x="350" y="130" text-anchor="middle" dy="5" fill="white" font-size="11" font-weight="bold">Cα</text>
+    <text x="420" y="100" text-anchor="middle" dy="5" fill="white" font-size="11" font-weight="bold">Cα</text>
+    <!-- cutoff annotation -->
+    <line x1="260" y1="80" x2="340" y2="60" stroke="#c05621" stroke-width="1.5" marker-end="url(#arr)"/>
+    <text x="305" y="55" text-anchor="middle" fill="#c05621" font-size="11" font-weight="600">≤ 8 Å → edge</text>
+    <text x="260" y="170" text-anchor="middle" fill="#a0aec0" font-size="11">dashed = &gt; 8 Å, no edge</text>
+  </svg>
+  <figcaption>Each node is a residue. Edges are drawn when Cα–Cα distance ≤ 8 Å.</figcaption>
+</figure>
+
+<!-- ── STEP 3: FEATURES ── -->
+<h2>Step 3 — Extract graph-level features</h2>
+<p>
+  Each contact graph is summarised into a <strong>19-dimensional feature vector</strong> capturing
+  topology (how connected residues are), geometry (how spread out they are), and spectral
+  properties (the shape of the Laplacian spectrum).
+</p>
+
+<table>
+  <thead>
+    <tr><th>Feature group</th><th>Features (dims)</th><th>What it captures</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Size</td>
+      <td>nodes, edges, density (3)</td>
+      <td>How many residues, how many contacts, how densely packed</td>
+    </tr>
+    <tr>
+      <td>Degree statistics</td>
+      <td>mean, std, max degree (3)</td>
+      <td>Average contact count per residue and spread — reflects compactness</td>
+    </tr>
+    <tr>
+      <td>Clustering coefficient</td>
+      <td>global CC (1)</td>
+      <td>How clique-like local neighbourhoods are — high in helices, low in loops</td>
+    </tr>
+    <tr>
+      <td>Distance statistics</td>
+      <td>mean, std Cα–Cα dist (2)</td>
+      <td>Overall spatial spread of the structure</td>
+    </tr>
+    <tr>
+      <td>Spectral (Laplacian)</td>
+      <td>10 smallest eigenvalues (10)</td>
+      <td>Global topology fingerprint — captures connectivity patterns independent of node labelling</td>
+    </tr>
+  </tbody>
+</table>
+
+<pre><code><span class="kw">def</span> <span class="fn">spectral_features</span>(G, k=<span class="nm">10</span>):
+    L    = nx.<span class="fn">normalized_laplacian_matrix</span>(G).<span class="fn">toarray</span>()
+    vals = np.linalg.<span class="fn">eigvalsh</span>(L)   <span class="cm"># deterministic, sorted ascending</span>
+    <span class="kw">return</span> vals[:k]                  <span class="cm"># smallest k eigenvalues</span>
+</code></pre>
+
+<div class="callout green">
+  <strong>Why Laplacian eigenvalues?</strong>
+  The spectrum of the normalised graph Laplacian is invariant to node relabelling — two graphs with
+  identical topology but permuted residue numbering get the same fingerprint.
+  The smallest eigenvalues capture global connectivity (how many clusters, how well-connected),
+  while larger ones capture finer local structure.
+</div>
+
+<!-- ── STEP 4: NORMALISE ── -->
+<h2>Step 4 — Normalise</h2>
+<p>
+  Features vary wildly in scale: node count is ~300–1300, eigenvalues are in [0, 2], distances in Å.
+  A <code>StandardScaler</code> (zero mean, unit variance per feature) ensures no single feature
+  dominates the distance computation purely because of its scale.
+</p>
+
+<!-- ── STEP 5: UMAP ── -->
+<h2>Step 5 — UMAP projection</h2>
+<p>
+  <strong>UMAP</strong> (Uniform Manifold Approximation and Projection) reduces the 19-dimensional
+  normalised feature vectors to 2D for visualisation. It works by:
+</p>
+<ol style="color: var(--muted); padding-left: 24px; margin-bottom: 16px;">
+  <li style="margin-bottom:6px"><strong>Building a high-dimensional graph</strong> — for each structure, find its k=15 nearest neighbours in feature space and weight edges by proximity.</li>
+  <li style="margin-bottom:6px"><strong>Fuzzy simplicial set</strong> — convert distances to a fuzzy membership strength, modelling a manifold in high-D.</li>
+  <li style="margin-bottom:6px"><strong>Low-D layout</strong> — find a 2D embedding that preserves the same fuzzy topology, minimising cross-entropy between the two fuzzy graphs.</li>
+</ol>
+<div class="callout warn">
+  <strong>What UMAP preserves:</strong> local neighbourhood structure (nearby points in 2D were nearby in 19D).
+  <strong>What it does not preserve:</strong> global distances — the gap between the two clusters in 2D is not
+  proportional to their actual distance in feature space.
+  Use the bar chart (nearest-neighbour distances) for quantitative comparisons, not the 2D positions.
+</div>
+
+<pre><code>reducer = umap.<span class="fn">UMAP</span>(
+    n_components = <span class="nm">2</span>,
+    metric       = <span class="st">"euclidean"</span>,
+    n_neighbors  = <span class="nm">15</span>,    <span class="cm"># local neighbourhood size</span>
+    random_state = <span class="nm">42</span>,
+)
+embedding = reducer.<span class="fn">fit_transform</span>(feats_scaled)  <span class="cm"># (386, 19) → (386, 2)</span>
+</code></pre>
+
+<!-- ── RESULT ── -->
+<h2>Result</h2>
+<img src="graph_similarity_pde10.png" class="umap-img" alt="UMAP of PDE10A structures"/>
+<p class="img-caption">
+  Left: UMAP projection coloured by data source (PDB grey, training blue circles, validation orange triangles).
+  Right: distance of each training/validation structure to its nearest PDB neighbour.
+</p>
+
+<!-- ── KEY FINDINGS ── -->
+<h2>Key findings</h2>
+<div class="findings">
+  <div class="finding">
+    <div class="finding-num">2</div>
+    <div class="finding-label">structural clusters</div>
+    <div class="finding-detail">
+      Monomers (~310 residues, single catalytic domain) and dimers (~1255 residues, biological assembly).
+      The assembly state is the dominant source of structural variation across all PDE10A entries.
+    </div>
+  </div>
+  <div class="finding">
+    <div class="finding-num">27/27</div>
+    <div class="finding-label">train/val structures present in PDB download</div>
+    <div class="finding-detail">
+      Every ApherisFold training and validation structure is a strict subset of the 359-structure PDB download.
+      Some are exact duplicates (dist = 0.000).
+    </div>
+  </div>
+  <div class="finding">
+    <div class="finding-num">~0</div>
+    <div class="finding-label">sequence diversity</div>
+    <div class="finding-detail">
+      All 386 structures share the same protein sequence (query hash 95af60c11e31a0e8).
+      Variation is purely structural — different ligands, crystal forms, and conformations.
+    </div>
+  </div>
+  <div class="finding">
+    <div class="finding-num">19</div>
+    <div class="finding-label">features per structure</div>
+    <div class="finding-detail">
+      Graph topology (size, degree, clustering) + distance statistics + 10 Laplacian eigenvalues.
+      No sequence information is used — purely 3D contact geometry.
+    </div>
+  </div>
+</div>
+
+<footer>
+  Pipeline: gemmi · networkx · numpy · scikit-learn · umap-learn &nbsp;|&nbsp;
+  Structures: RCSB PDB batch download, PDE10A (PDE10) &nbsp;|&nbsp;
+  Contact-graph cutoff: 8 Å Cα–Cα
+</footer>
+
+</body>
+</html>
