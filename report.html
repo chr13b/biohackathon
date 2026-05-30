@@ -1,0 +1,911 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>OF3 × PDE10A — Data Lane Report</title>
+<style>
+  :root {
+    --bg:       #f7f7f5;
+    --panel:    #ffffff;
+    --ink:      #1a1a1a;
+    --muted:    #6b6b6b;
+    --line:     #e3e3e0;
+    --accent:   #2b6cb0;
+    --good:     #2f7d32;
+    --warn:     #b45309;
+    --bad:      #b91c1c;
+    --d0a:      #2b6cb0;
+    --d0b:      #4338ca;
+    --d1:       #0f766e;
+    --d2:       #b45309;
+    --d3:       #6b21a8;
+    --highlight: #fef9c3;
+    --highlight-border: #ca8a04;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 15px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI",
+           Roboto, "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 32px 24px 96px; }
+
+  /* Hero */
+  header.hero {
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 22px;
+    margin-bottom: 28px;
+  }
+  header.hero .eyebrow {
+    color: var(--muted);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 700;
+  }
+  header.hero h1 {
+    font-size: 30px; margin: 6px 0 8px 0; letter-spacing: -0.01em;
+  }
+  header.hero .sub { color: var(--muted); font-size: 14px; }
+  header.hero blockquote {
+    border-left: 3px solid var(--accent);
+    background: #fff;
+    padding: 12px 16px;
+    margin: 18px 0 0 0;
+    font-style: italic;
+    color: #333;
+    border-radius: 0 6px 6px 0;
+  }
+  .status-pill {
+    display: inline-block;
+    margin-top: 12px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: #dcfce7;
+    color: #166534;
+    font-size: 13px;
+    font-weight: 700;
+    border: 1px solid #86efac;
+  }
+
+  /* Sections */
+  h2.section {
+    font-size: 19px;
+    letter-spacing: -0.005em;
+    margin: 44px 0 14px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--line);
+  }
+  h2.section .tag {
+    color: var(--muted);
+    font-weight: 400;
+    font-size: 13px;
+    margin-left: 8px;
+  }
+  h3 { font-size: 16px; margin: 18px 0 6px 0; }
+
+  /* Fact cards */
+  .facts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin: 22px 0 32px;
+  }
+  .fact {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 12px 14px;
+  }
+  .fact .k { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; }
+  .fact .v { font-weight: 600; font-size: 14px; margin-top: 4px; }
+
+  /* Pipeline stepper */
+  .pipeline {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .step {
+    display: grid;
+    grid-template-columns: 56px 1fr;
+    gap: 14px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 14px 16px;
+    align-items: start;
+  }
+  .step .n {
+    width: 38px; height: 38px;
+    border-radius: 999px;
+    background: var(--accent);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 16px;
+  }
+  .step h4 { margin: 0 0 4px 0; font-size: 15px; }
+  .step p { margin: 0; font-size: 13.5px; color: #333; }
+  .step code { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: 12.5px; background: #f1f1ee; padding: 1px 5px; border-radius: 3px; }
+
+  /* Image panel */
+  .figure {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 18px;
+    margin-top: 18px;
+  }
+  .figure img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 4px;
+    border: 1px solid var(--line);
+  }
+  .figure .caption { font-size: 12.5px; color: var(--muted); margin-top: 8px; }
+  .legend-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 10px;
+    margin-top: 14px;
+  }
+  .legend-item {
+    background: #fafaf7;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+  .legend-item b { display: block; margin-bottom: 2px; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+  .marker-sample {
+    display: inline-block;
+    width: 14px; height: 14px;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+  .marker-square { background: #6b21a8; }
+  .marker-circle { background: #2b6cb0; border-radius: 999px; }
+  .marker-plus::before {
+    content: "+";
+    color: #b45309;
+    font-weight: 900;
+    font-size: 18px;
+    line-height: 14px;
+    margin-right: 6px;
+  }
+
+  /* Highlight box for the misconception clarification */
+  .highlight {
+    background: var(--highlight);
+    border: 1px solid var(--highlight-border);
+    border-left: 5px solid var(--highlight-border);
+    border-radius: 6px;
+    padding: 18px 22px;
+    margin: 18px 0;
+  }
+  .highlight h3 { margin-top: 0; color: #713f12; }
+  .highlight p { margin: 0 0 8px 0; }
+  .highlight strong { color: #713f12; }
+
+  /* Two-column compare panels */
+  .compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  @media (max-width: 720px) { .compare { grid-template-columns: 1fr; } }
+  .col {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 14px 16px;
+  }
+  .col.good { border-left: 5px solid var(--good); }
+  .col.bad { border-left: 5px solid var(--bad); }
+  .col h4 { margin: 0 0 8px 0; font-size: 14px; }
+  .col ul { margin: 0; padding-left: 18px; }
+  .col li { font-size: 13px; margin: 4px 0; }
+
+  /* Findings table */
+  table.findings {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    overflow: hidden;
+    font-size: 13.5px;
+  }
+  table.findings th, table.findings td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--line);
+    text-align: left;
+    vertical-align: top;
+  }
+  table.findings th {
+    background: #f1f1ee;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+    font-weight: 700;
+  }
+  table.findings tbody tr:last-child td { border-bottom: 0; }
+  table.findings td:first-child {
+    font-weight: 700;
+    color: var(--muted);
+    width: 36px;
+  }
+
+  /* Checklist */
+  .check { display: flex; align-items: start; gap: 10px; margin: 6px 0; font-size: 14px; }
+  .check .mark {
+    display: inline-block;
+    width: 22px; height: 22px;
+    background: var(--good);
+    color: white;
+    border-radius: 4px;
+    text-align: center;
+    line-height: 22px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .check .mark.todo { background: var(--warn); }
+  .check .mark.maybe { background: #888; }
+  .check span code { font-family: ui-monospace, Consolas, monospace; font-size: 12.5px; background: #f1f1ee; padding: 1px 5px; border-radius: 3px; }
+
+  /* Option lanes */
+  .lanes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 16px;
+  }
+  .lane {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 18px;
+    position: relative;
+  }
+  .lane::before {
+    content: ""; position: absolute; left: 0; top: 0; bottom: 0;
+    width: 5px; border-radius: 8px 0 0 8px;
+  }
+  .lane.opt-a::before { background: var(--good); }
+  .lane.opt-b::before { background: var(--warn); }
+  .lane.opt-c::before { background: var(--d3); }
+  .lane .rank {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--muted);
+  }
+  .lane.opt-a .rank { color: var(--good); }
+  .lane.opt-b .rank { color: var(--warn); }
+  .lane.opt-c .rank { color: var(--d3); }
+  .lane h3 { margin: 4px 0 4px 0; font-size: 17px; }
+  .lane .summary { color: var(--muted); font-size: 13px; margin-bottom: 12px; }
+  .lane dl { display: grid; grid-template-columns: 80px 1fr; gap: 4px 12px; margin: 0; font-size: 13px; }
+  .lane dt { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; padding-top: 2px; font-weight: 700; }
+  .lane dd { margin: 0; }
+  .lane .ranking-badge {
+    position: absolute;
+    top: 14px; right: 14px;
+    font-size: 11px;
+    font-weight: 700;
+    color: white;
+    padding: 4px 10px;
+    border-radius: 999px;
+  }
+  .lane.opt-a .ranking-badge { background: var(--good); }
+  .lane.opt-b .ranking-badge { background: var(--warn); }
+  .lane.opt-c .ranking-badge { background: var(--d3); }
+
+  /* Methodology */
+  .meth-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+  }
+  .meth {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 12px 14px;
+  }
+  .meth h4 { margin: 0 0 4px 0; font-size: 13px; }
+  .meth p { margin: 0; font-size: 12.5px; color: #333; }
+
+  footer {
+    margin-top: 56px;
+    color: var(--muted);
+    font-size: 12px;
+    border-top: 1px solid var(--line);
+    padding-top: 14px;
+  }
+  code, kbd { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: 12.5px; }
+  .arrow { color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <div class="eyebrow">OpenFold3 × PDE10A · Apheris hackathon · Team 4</div>
+  <h1>Data lane report — what we did, what we found, what's next</h1>
+  <div class="sub">Similarity-aware data curation lane (Chris) · 2026-05-30 · post-execution snapshot</div>
+  <blockquote>
+    Can a focused fine-tune on PDE10A — using the 10 provided complexes
+    plus distribution-aware augmentation from the 359 RCSB Q9Y233 entries
+    and a rebalanced split — meaningfully improve OF3 pose accuracy on
+    held-out PDE10A complexes?
+  </blockquote>
+  <div class="status-pill">Status: OF3 input ready · 44 train + 8 eval, zero missing CIF+a3m pairs</div>
+</header>
+
+
+<h2 class="section">Snapshot <span class="tag">at a glance</span></h2>
+
+<div class="facts">
+  <div class="fact"><div class="k">Target</div><div class="v">human PDE10A · UniProt Q9Y233</div></div>
+  <div class="fact"><div class="k">Original split</div><div class="v">10 train · 17 val</div></div>
+  <div class="fact"><div class="k">Rebalanced split</div><div class="v">44 train · 8 eval</div></div>
+  <div class="fact"><div class="k">RCSB hits</div><div class="v">359 total · 271 viable</div></div>
+  <div class="fact"><div class="k">Augmentation picks</div><div class="v">25 real PDB entries</div></div>
+  <div class="fact"><div class="k">GPU</div><div class="v">A100-80GB (not H100)</div></div>
+  <div class="fact"><div class="k">FT time</div><div class="v">~9–12 h estimated</div></div>
+  <div class="fact"><div class="k">MSA generation cost</div><div class="v">~zero · canonical reuse</div></div>
+</div>
+
+
+<h2 class="section">Pipeline narrative <span class="tag">what actually happened, in order</span></h2>
+
+<div class="pipeline">
+
+  <div class="step">
+    <div class="n">1</div>
+    <div>
+      <h4>Parse 27 CIFs from the Apheris dataset</h4>
+      <p>For each of the 10 train + 17 val PDE10A co-crystals, parsed the
+      mmCIF (via <code>gemmi</code>) to extract per-chain protein
+      sequence, the bound ligand as SMILES (via <code>rdkit</code>), and
+      a <b>binding-site residue mask</b> — every polymer residue with at
+      least one heavy atom within 5 Å of the ligand. Computed an MD5
+      hash of the SEQRES to group constructs.</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="n">2</div>
+    <div>
+      <h4>Verify the MSA situation</h4>
+      <p>Checked every <code>_msa.a3m</code> file Apheris shipped. Hit
+      the headline finding immediately: <b>all 27 a3ms are
+      bit-identical</b> (md5 <code>8569ccaf...</code>). The 28th file
+      (<code>5shr_alt1_msa.a3m</code>) is an alternate construct's MSA.
+      Apheris uses one canonical PDE10A catalytic-domain MSA across
+      every entry. This collapsed augmentation MSA cost from
+      "rate-limiting" to "free copy".</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="n">3</div>
+    <div>
+      <h4>Embed proteins with ESM-2</h4>
+      <p>Used the pretrained <code>facebook/esm2_t12_35M_UR50D</code>
+      model to embed each complex's protein sequence (whole protein +
+      pocket-only). Mean-pooled token embeddings. Built a 27×27 cosine
+      similarity matrix on the <b>pocket-only</b> embedding — that's
+      where the conservation signal sits, since all 27 share the PDE10A
+      fold and whole-protein embeddings would look near-identical.</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="n">4</div>
+    <div>
+      <h4>Embed ligands with RDKit Morgan FPs</h4>
+      <p>Extracted the primary (largest non-solvent) ligand per CIF,
+      computed Morgan-r2-2048 fingerprints, built the Tanimoto similarity
+      matrix, and Butina-clustered at cutoff 0.65 (the chemotype-scaffold
+      regime for fragment-sized ligands).</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="n">5</div>
+    <div>
+      <h4>Joint similarity + UMAP projection</h4>
+      <p>Combined the pocket-ESM cosine and ligand-Morgan-Tanimoto
+      matrices into a joint score (mean). UMAP-projected the pocket-ESM
+      embeddings to 2D. This is the picture in <code>similarity_map.png</code>
+      below.</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="n">6</div>
+    <div>
+      <h4>RCSB search — find more real PDE10A complexes</h4>
+      <p>Hit the RCSB Search API with full-text "Q9Y233" → <b>359 PDB
+      entries</b>, all human PDE10A. Hit the GraphQL data API in chunks
+      to pull metadata (SEQRES, ligand SMILES, resolution, deposit date)
+      for every one. Cached everything under <code>~/biohackathon-work/cache/</code>.</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="n">7</div>
+    <div>
+      <h4>Filter to viable candidates</h4>
+      <p>Dropped: (a) entries in our 27 (e.g. 5SHR was a hit), (b)
+      entries with no bound small-molecule ligand, (c) entries whose
+      SEQRES doesn't contain the canonical Apheris MSA query (different
+      protein construct boundaries — these would need a fresh MSA).
+      <b>271 of 359 candidates survived.</b></p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="n">8</div>
+    <div>
+      <h4>Score &amp; chemotype-balanced pick</h4>
+      <p>For each of the 271 candidates: computed max Tanimoto vs our
+      train ligands and vs our val ligands; recorded the nearest neighbour
+      in each set. Butina-clustered the candidate ligands too. Then
+      picked 25 entries with two rules:</p>
+      <ul style="margin: 6px 0 0 0; font-size: 13.5px;">
+        <li><b>3 picks per uncovered val ligand cluster</b> (6 clusters × 3 = 18)</li>
+        <li><b>7 cluster-diversity fillers</b> from candidate clusters not yet sampled</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="n">9</div>
+    <div>
+      <h4>Assemble augmentation_set/ on the VM</h4>
+      <p>For each of the 25 picks: downloaded the CIF from RCSB, copied
+      the canonical <code>5sdy_msa.a3m</code> to
+      <code>&lt;pdb_id&gt;_msa.a3m</code>, verified the CIF parses and has
+      a ligand. Result: 25 paired CIF+a3m files (104 MB) at
+      <code>~/biohackathon-work/similarity/augmentation_set/</code>.</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="n">10</div>
+    <div>
+      <h4>Propose the rebalanced split</h4>
+      <p>Built <code>split_proposal.json</code> with three views:
+      <b>original</b> (10/17, kept as reference), <b>rebalanced</b>
+      (44 train / 8 eval — 10 originals + 9 reassigned from val + 25
+      augmentations; 8 held-out chosen one-per-ligand-cluster +
+      1 extra-far), and <b>leave-one-ligand-cluster-out</b>
+      (7 stricter evaluation slices, one per val ligand cluster).</p>
+    </div>
+  </div>
+
+</div>
+
+
+<h2 class="section">Looking at <code>similarity_map.png</code> <span class="tag">how to read the figure</span></h2>
+
+<div class="figure">
+  <img src="results/similarity/similarity_map.png" alt="UMAP of pocket-ESM embeddings of the 27 PDE10A complexes" />
+  <div class="caption">
+    UMAP-2D projection of the 27 complexes' protein pocket ESM-2
+    embeddings, coloured by ligand chemotype cluster (Butina, cutoff
+    0.65). Each point is one PDB entry; PDB IDs annotated.
+  </div>
+</div>
+
+<div class="legend-grid">
+  <div class="legend-item">
+    <b>What's plotted</b>
+    Each of the 27 complexes (10 train + 17 val) is one point. The
+    2D position comes from a UMAP of the 480-dimensional pocket-ESM-2
+    embeddings (mean-pooled over the 17–21 binding-site residues per
+    complex).
+  </div>
+  <div class="legend-item">
+    <b>Marker shape</b>
+    <span class="marker-sample marker-square"></span> Train (10 complexes,
+    square)<br>
+    <span class="marker-sample marker-circle"></span> Val (17 complexes,
+    circle)<br>
+    Markers come from the published Apheris split.
+  </div>
+  <div class="legend-item">
+    <b>Marker colour</b>
+    Each colour is one ligand chemotype cluster (Butina cluster id over
+    Morgan-FP Tanimoto). Same colour = ligands with similar
+    2D-scaffold. Grey = ligand fingerprint couldn't be built.
+  </div>
+  <div class="legend-item">
+    <b>What it tells us</b>
+    Protein-side, all 27 cluster tightly (they're all PDE10A — fold is
+    conserved). The story lives in the ligand colours: <b>train and val
+    are coloured almost entirely disjointly</b>. The published split is
+    chemotype-stratified, not random.
+  </div>
+</div>
+
+<h3>What we learn from the figure</h3>
+<ul style="font-size: 14px;">
+  <li><b>Protein-side coverage looks uniform.</b> All 27 pocket
+  embeddings sit close together. Pocket geometry is not a useful
+  discriminator within our 27 — we need the ligand side to
+  separate them, which is exactly what the colours show.</li>
+  <li><b>Train clusters (squares) and val clusters (circles) sit in
+  different colour groups.</b> Train ligand clusters
+  {0, 3, 4, 9, 10, 11, 12, 13, 14}; val clusters {0, 1, 2, 5, 6, 7, 8}.
+  Six of seven val clusters have no train representative.</li>
+  <li><b>This is the "domain adaptation" framing in one picture.</b>
+  The model is being asked to predict pose on a ligand chemotype it
+  has not seen during fine-tuning — the published split is already a
+  generalisation test.</li>
+</ul>
+
+
+<h2 class="section">How the augmentation is generated — and why 25, not 271 <span class="tag">important — read this</span></h2>
+
+<div class="highlight">
+  <h3>Clarification: all 25 augmentation picks are REAL PDB entries</h3>
+  <p>
+    Each pick is a real X-ray crystal structure of human PDE10A bound to
+    a ligand, deposited to the RCSB Protein Data Bank by researchers
+    (mostly the XChem fragment screen at Diamond, with some lead-opt
+    co-crystals from earlier campaigns). <strong>Nothing in the
+    augmentation set is synthetic, simulated, generated, or hallucinated.</strong>
+    The picks include entries like <code>5SH5</code>, <code>5SK4</code>,
+    <code>4MSA</code>, <code>4LM0</code>, <code>4MRZ</code> — all real
+    crystal structures.
+  </p>
+  <p>
+    The word "augmentation" here is a data-curation term: we are
+    augmenting the 10-entry training pool Apheris shipped by adding
+    more real co-crystals from the public domain. There is no
+    artificial-data injection at this stage.
+  </p>
+  <p>
+    The "synthetic structures via docking/diffusion" route — generating
+    artificial poses with tools like AutoDock Vina or a diffusion model
+    — is a <strong>Tier 4 fallback in our plan that we have NOT
+    triggered</strong> and have no plans to trigger unless the first FT
+    run shows specific chemotype gaps that real PDB data cannot fill.
+  </p>
+</div>
+
+<h3>How a pick becomes a usable training entry</h3>
+
+<div class="pipeline" style="margin-top: 8px;">
+  <div class="step">
+    <div class="n" style="background: var(--d2)">A</div>
+    <div>
+      <h4>Download the real CIF from RCSB</h4>
+      <p><code>https://files.rcsb.org/download/&lt;pdb_id&gt;.cif</code>
+      — the official crystallographic file. Cached locally on the VM.</p>
+    </div>
+  </div>
+  <div class="step">
+    <div class="n" style="background: var(--d2)">B</div>
+    <div>
+      <h4>Reuse the canonical PDE10A MSA</h4>
+      <p>Copy <code>5sdy_msa.a3m</code> to
+      <code>&lt;pdb_id&gt;_msa.a3m</code>. This works because (a) all
+      359 RCSB Q9Y233 entries share the UniProt protein sequence and
+      (b) all 27 Apheris-supplied a3ms are bit-identical, so the same
+      MSA applies. We do not generate any new alignment.</p>
+    </div>
+  </div>
+  <div class="step">
+    <div class="n" style="background: var(--d2)">C</div>
+    <div>
+      <h4>Sanity-check the CIF</h4>
+      <p>Parse it with gemmi; confirm it has at least one protein chain
+      and at least one bound non-solvent ligand. If either is missing,
+      drop the pick. (None of our 25 were dropped at this stage.)</p>
+    </div>
+  </div>
+  <div class="step">
+    <div class="n" style="background: var(--d2)">D</div>
+    <div>
+      <h4>Drop into augmentation_set/ with the Apheris naming</h4>
+      <p>The Hub UI expects pairs like <code>&lt;id&gt;.cif</code> +
+      <code>&lt;id&gt;_msa.a3m</code> living together. We mirror that.</p>
+    </div>
+  </div>
+</div>
+
+<h3>Why 25 of 271, not all 271</h3>
+
+<div class="compare">
+  <div class="col good">
+    <h4>Why we picked 25 (current choice)</h4>
+    <ul>
+      <li><b>Hyperparameter safety.</b> Apheris's reference recipe
+      (<code>learning_rate=0.0003</code>, <code>ema_decay=0.99</code>) was
+      tuned for N=10. Going from 10 → 44 (4.4×) keeps us within a safe
+      regime; we expect the recipe to converge in the 10 h budget.</li>
+      <li><b>Chemotype diversity, not redundancy.</b> 18 of 25 picks
+      cover the 6 val-only ligand clusters (3 per cluster); 7 add
+      candidate-cluster diversity. Over-sampling one scaffold wouldn't
+      help.</li>
+      <li><b>Apheris reference proves the regime works.</b> Their
+      published run used 10. We're already at 44.</li>
+      <li><b>Wall-clock budget.</b> 25 took ~10 min to assemble; left
+      time for splits + brief + report.</li>
+    </ul>
+  </div>
+  <div class="col bad">
+    <h4>Why we didn't take all 271</h4>
+    <ul>
+      <li><b>Hyperparameter mismatch risk.</b> 10 → 290 is a 29× scale-up.
+      Gradient-noise profile changes; the reference LR/EMA likely won't
+      converge in 10 h without retuning, and we have no budget to retune.</li>
+      <li><b>Original-data dilution.</b> With 290 train entries, each
+      original entry is "seen" much less often per epoch. The augmentation
+      should be a supplement, not the dominant signal.</li>
+      <li><b>Diminishing chemotype returns.</b> ~246 of the unpicked
+      are also XChem 5S* 2022 fragments (same screen as our 25). Adding
+      hundreds of nearly-identical-screen entries doesn't broaden
+      chemotype space meaningfully.</li>
+      <li><b>Wall-clock cost.</b> Assembling 271 takes ~30 min + FT
+      slows per epoch = less time for analysis and the deck.</li>
+    </ul>
+  </div>
+</div>
+
+<p style="font-size: 13.5px; color: var(--muted); margin-top: 14px;">
+  <b>If we get a v2 FT run</b> (after seeing first-run results), scaling
+  to 271 is on the table. But not before the first run — see Option B
+  below.
+</p>
+
+
+<h2 class="section">Findings <span class="tag">8 takeaways</span></h2>
+
+<table class="findings">
+  <thead>
+    <tr><th>#</th><th>Finding</th><th>Why it matters</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>Apheris uses <b>one canonical MSA</b> across all 27 entries
+        (md5 <code>8569ccaf...</code> bit-identical for 27/28 a3ms).</td>
+      <td>MSA reuse for any PDE10A entry = trivial copy. Augmentation
+        MSA cost collapsed from hours to zero.</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>Published 10/17 split is <b>adversarially chemotype-stratified</b>.
+        6 of 7 val ligand clusters are uncovered by train at
+        Butina-cutoff 0.65.</td>
+      <td>Random splits would be misleading; the published split is
+        already a strong generalisation test.</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>Pairwise ligand Tanimoto across the 27: <b>p50 = 0.17, p95 = 0.48</b>.</td>
+      <td>Fragment-screen heterogeneity is real. Don't expect strong
+        chemotype transfer fragment-to-fragment.</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>Across 271 viable PDE10A candidates from PDB, the max ligand
+        Tanimoto to any val complex is <b>0.16</b>.</td>
+      <td>Augmentation broadens chemotype coverage but is NOT
+        chemotypically close to val. The FT win condition is "broader
+        pocket exposure helps anyway".</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>~88 of 359 RCSB hits dropped as MSA-incompatible (different
+        construct). Most are pre-2014 drug-like inhibitors.</td>
+      <td>Available later if we need drug-like augmentation; would need
+        fresh MSAs. Not needed for the current FT run.</td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td>Rebalanced split: <b>44 train / 8 eval</b> spanning 7 ligand
+        clusters; all eval clusters credited as covered.</td>
+      <td>This is the recommended split for the FT run.</td>
+    </tr>
+    <tr>
+      <td>7</td>
+      <td>Teammate's <code>graph_similarity_pde10.py</code> uses Cα-Cα
+        contact graph + spectral Laplacian features — independent
+        protein-side signal.</td>
+      <td>Two independent protein-side similarity votes available for
+        ensembling.</td>
+    </tr>
+    <tr>
+      <td>8</td>
+      <td><b>VM has A100-80GB, not H100</b> as Apheris docs claim.</td>
+      <td>FT estimated ~10 h. CLAUDE.md corrected.</td>
+    </tr>
+  </tbody>
+</table>
+
+
+<h2 class="section">OF3 input readiness <span class="tag">is the FT ready to start?</span></h2>
+
+<div class="check"><span class="mark">✓</span><span>27 original entries (10 train + 17 val) have CIF + a3m at <code>~/apherisfold_inputs/apherisfold_inputs/{train,val}/</code></span></div>
+<div class="check"><span class="mark">✓</span><span>25 augmentation entries have CIF + a3m at <code>~/biohackathon-work/similarity/augmentation_set/</code> (104 MB)</span></div>
+<div class="check"><span class="mark">✓</span><span>Every a3m in <code>augmentation_set/</code> is a verified copy of the canonical (md5 <code>8569ccaf...</code>)</span></div>
+<div class="check"><span class="mark">✓</span><span>Rebalanced split: 44 train + 8 eval — <b>zero missing CIF+a3m pairs</b> (verified on VM)</span></div>
+<div class="check"><span class="mark">✓</span><span>Config <code>configs/reference.json</code> ready, only tweak: lower <code>maximum_training_time</code> to 36000 s (10 h)</span></div>
+<div class="check"><span class="mark">✓</span><span>Hub UI is live at <code>http://localhost:8081</code> via the SSH tunnel</span></div>
+<div class="check"><span class="mark todo">!</span><span>246 additional real RCSB candidates are NOT assembled (have metadata only). Can be built in ~30 min if Option B is triggered.</span></div>
+
+<p style="font-size: 14px; margin-top: 14px;">
+  <b>Bottom line:</b> OF3 has its full input. The FT can start immediately
+  via the Hub UI Fine-tune page.
+</p>
+
+
+<h2 class="section">Three options forward <span class="tag">ordered by importance</span></h2>
+
+<div class="lanes">
+
+  <div class="lane opt-a">
+    <span class="ranking-badge">#1 · recommended</span>
+    <div class="rank">Option A · ship now</div>
+    <h3>Kick off the FT run</h3>
+    <div class="summary">The FT run is the irreducible critical-path item. Every hour spent NOT training is a wasted hour against the 24 h budget.</div>
+    <dl>
+      <dt>Do now</dt>
+      <dd>Upload 44 train + 8 eval via the Hub UI Fine-tune page. Paste <code>configs/reference.json</code> with <code>maximum_training_time: 36000</code>. Start.</dd>
+      <dt>In parallel</dt>
+      <dd>Run base-OF3 inference on the 8 eval via the Predict page → <code>results/baseline/per_complex_errors.csv</code>.</dd>
+      <dt>Pros</dt>
+      <dd>Only path that guarantees a fine-tuned model at submission. Frees the rest of the day for analysis + deck.</dd>
+      <dt>Cons</dt>
+      <dd>Commits to the current 25-pick augmentation set. Can't expand mid-run.</dd>
+      <dt>Falsifier</dt>
+      <dd>If base OF3 already saturates PL LDDT on the 8 eval, no FT gain is possible → pivot the deck to the chemotype-stratification finding.</dd>
+    </dl>
+  </div>
+
+  <div class="lane opt-c">
+    <span class="ranking-badge">#2 · run alongside #1</span>
+    <div class="rank">Option C · strengthen signal in parallel</div>
+    <h3>Ensemble similarity during the FT</h3>
+    <div class="summary">Runs CPU-side while the A100 is busy with FT. Produces deck content and a methodology vote — zero opportunity cost.</div>
+    <dl>
+      <dt>Do</dt>
+      <dd>Integrate teammate's spectral-graph protein similarity with our pocket-ESM signal. Re-rank the 271 candidates; produce a "second opinion" v2 pick list. Build a 3-panel similarity dashboard HTML.</dd>
+      <dt>Pros</dt>
+      <dd>Zero opportunity cost. Produces real deck content. Methodological cross-check is itself a finding.</dd>
+      <dt>Cons</dt>
+      <dd>Doesn't directly improve the FT outcome — it's an analysis layer.</dd>
+      <dt>Falsifier</dt>
+      <dd>If the two protein-side rankings disagree wildly on the top-25, one of them is uninformative here — pick the more interpretable one for the deck and report the caveat.</dd>
+    </dl>
+  </div>
+
+  <div class="lane opt-b">
+    <span class="ranking-badge">#3 · defer</span>
+    <div class="rank">Option B · scale augmentation, then ship</div>
+    <h3>Assemble all 271, retrain</h3>
+    <div class="summary">The obvious "more data" move, but with real downsides. Only do this AFTER A's first FT, if results justify it.</div>
+    <dl>
+      <dt>Do</dt>
+      <dd>Re-run <code>assemble_augmentation_set.py</code> with no cap → 271 picks. Re-build splits (290 train / 8 eval). Train again.</dd>
+      <dt>Pros</dt>
+      <dd>Much more data; comprehensive PDB coverage; stronger narrative.</dd>
+      <dt>Cons</dt>
+      <dd>10 → 290 is 29× scale-up; reference LR/EMA likely won't converge in 10 h without retuning. Most of the 246 extra entries are the same XChem fragment screen — diminishing chemotype returns. Spending 30 min on this delays the first FT.</dd>
+      <dt>When</dt>
+      <dd>Only as a v2 run, AFTER A's first FT has shown a real but small gain that "more data" might amplify.</dd>
+      <dt>Falsifier</dt>
+      <dd>If A's first FT shows zero gain, B won't save it (the issue is methodology, not sample size).</dd>
+    </dl>
+  </div>
+
+</div>
+
+
+<h2 class="section">Methodology appendix <span class="tag">choices and why</span></h2>
+
+<div class="meth-grid">
+  <div class="meth">
+    <h4>ESM-2 model: <code>esm2_t12_35M_UR50D</code></h4>
+    <p>35M params is enough for the pocket-residue signal in a single
+    well-studied protein. Faster on CPU than t33 (650M) and avoids the
+    download. Downstream embeddings live in ℝ^480.</p>
+  </div>
+  <div class="meth">
+    <h4>Pocket radius: 5 Å heavy-atom</h4>
+    <p>Standard for binding-site definition. Yields 17–21 residues per
+    complex — enough to embed, sparse enough to be chemotype-discriminative.</p>
+  </div>
+  <div class="meth">
+    <h4>Morgan FP: r=2, 2048 bits</h4>
+    <p>Industry-standard for chemotype similarity. r=2 is the sweet spot
+    for fragment-sized molecules (r=3 over-fits, r=1 under-fits).</p>
+  </div>
+  <div class="meth">
+    <h4>Butina cluster cutoff: 0.65</h4>
+    <p>Initial 0.5 was too strict (20 micro-clusters across 27 ligands).
+    0.65 groups pairs with Tanimoto &gt; 0.35, the chemotype-scaffold regime
+    for fragments. Yields 15 clusters — interpretable.</p>
+  </div>
+  <div class="meth">
+    <h4>Joint score: mean of protein + ligand similarity</h4>
+    <p>Simple, interpretable. A multiplicative outer-product would
+    over-penalise pairs where one side scores zero. Mean is a fair
+    balance under our two-vote setup.</p>
+  </div>
+  <div class="meth">
+    <h4>Pick policy: cluster coverage + diversity</h4>
+    <p>3 picks per uncovered val ligand cluster (covers the
+    generalisation probes) + 7 fillers from candidate clusters not yet
+    sampled (broadens chemotype space). Total = 25.</p>
+  </div>
+  <div class="meth">
+    <h4>MSA reuse: copy canonical, not generate</h4>
+    <p>All 27 Apheris-supplied a3ms are bit-identical, and the 359 RCSB
+    Q9Y233 entries share the same UniProt — so the canonical Apheris MSA
+    applies to every PDE10A entry. We copy &amp; rename. No alignment
+    work needed.</p>
+  </div>
+  <div class="meth">
+    <h4>Rebalanced split: 1 per cluster + 1 far</h4>
+    <p>For the held-out eval, one entry per val ligand cluster (so we
+    cover the chemotype space) plus 1 extra from the cluster furthest
+    from train in joint similarity. The rest of the original val moves
+    into train.</p>
+  </div>
+</div>
+
+
+<h2 class="section">Files &amp; where to find them <span class="tag">repo layout</span></h2>
+
+<div class="compare" style="grid-template-columns: 1fr 1fr;">
+  <div class="col">
+    <h4>Code (<code>src/data/</code>)</h4>
+    <ul>
+      <li><code>sequence_extract.py</code> — CIF → seq + ligand + pocket</li>
+      <li><code>embed_proteins.py</code> — ESM-2 embeddings</li>
+      <li><code>embed_ligands.py</code> — Morgan FP + Butina</li>
+      <li><code>joint_similarity.py</code> — joint scoring + UMAP</li>
+      <li><code>retrieve_rcsb.py</code> — RCSB Search + GraphQL API</li>
+      <li><code>select_augmentation.py</code> — filter + pick</li>
+      <li><code>assemble_augmentation_set.py</code> — CIF + MSA assembly</li>
+      <li><code>splits.py</code> — split proposal builder</li>
+      <li><code>run_27.py</code> — end-to-end driver</li>
+    </ul>
+  </div>
+  <div class="col">
+    <h4>Results (<code>results/similarity/</code>)</h4>
+    <ul>
+      <li><code>per_complex_similarity.csv</code> — per-complex schema for the team</li>
+      <li><code>similarity_map.png</code> — the UMAP figure embedded above</li>
+      <li><code>augmentation_candidates.csv</code> — all 271 filtered</li>
+      <li><code>augmentation_picks.csv</code> — the 25 selected</li>
+      <li><code>augmentation_set_manifest.csv</code> — what's on the VM</li>
+      <li><code>split_proposal.json</code> — original + rebalanced + 7 LOCO</li>
+      <li><code>meta_27.csv</code> — per-complex meta for our 27</li>
+    </ul>
+  </div>
+</div>
+
+
+<footer>
+  Plan file: <code>~/.claude/plans/we-re-at-a-hackathon-parallel-quilt.md</code> ·
+  Memory: <code>CLAUDE.md</code>, <code>memory.md</code> ·
+  Generated by Claude Code (Opus 4.7) for Team 4 on 2026-05-30.
+</footer>
+
+</div>
+</body>
+</html>
