@@ -4,14 +4,27 @@
 > `memory.md`. **At the start of every session, read `memory.md`.**
 
 ## WHY
-Hackathon project: fine-tune the public **OpenFold3 (OF3)** co-folding model on a
-small set of **PDE10A** protein–ligand structures using **ApherisFold**, and show
-we can correct systematic pose errors for this target/chemotype without degrading
+Hackathon project: fine-tune the public **OpenFold3 (OF3)** co-folding model on
+**PDE10A** protein–ligand structures using **ApherisFold**, and show we can
+correct systematic pose errors for this target/chemotype without degrading
 general performance.
 
 The practical question we are answering:
-> Can a handful (~10) of liganded structures meaningfully improve OF3 pose accuracy
-> on held-out PDE10A complexes?
+> Can a focused fine-tune on PDE10A — drawing on the ~10 provided complexes plus
+> augmentation from the ~359 RCSB Q9Y233 entries and distribution-matched splits —
+> meaningfully improve OF3 pose accuracy on held-out PDE10A complexes?
+
+**Framing:** organizers have explicitly framed this as a *domain adaptation*
+problem (graph/embedding-based similarity matching, distribution-aware splits,
+optional synthetic data) — not a hyperparameter tuning problem.
+
+**My ownership (Chris):** the similarity / distribution lane — build the
+distributional view of the 27 provided complexes + 359 RCSB Q9Y233 entries,
+propose a rebalanced train/eval split, prepare augmentation CIFs + a3ms for
+upload to the Apheris UI.
+
+**Other teammates' ownership:** failure-mode characterisation of base OF3 on
+the held-out complexes (will emerge from the first runs, not pre-known).
 
 ## WHAT
 - **Target:** human PDE10A
@@ -24,6 +37,12 @@ The practical question we are answering:
     fragment screens** at Diamond — expect small, chemotype-clustered ligands
     at the cAMP/cGMP pocket. Implication: random splits are effectively
     similar-chemotype splits; pose RMSD on these tiny ligands is noisy.
+  - **Augmentation pool:** RCSB full-text search for UniProt `Q9Y233` returns
+    **359 PDB entries** (all human PDE10A), mixing the 5S\* fragments with
+    older drug-discovery-era inhibitor co-crystals (2OU\*, 2Y0J, 2ZMF, 3UI7,
+    3WI2, 3WS8/9, 4AEL, 4AJD, 4P0N, 4TPM, etc.). All share the same UniProt
+    entry, so **MSAs reused from our existing 27 a3ms cover the augmentation
+    set for ~free** — sequence-md5 check + copy the closest matching a3m.
   - Dataset archive on the VM: `/apheris/apherisfold_inputs.zip`
 - **Primary metrics:** pose RMSD on held-out structures; Protein–Ligand LDDT (PL LDDT),
   Inter-Chain Protein LDDT (ICP LDDT), Intra-Protein LDDT (IP LDDT). Compare
@@ -37,7 +56,7 @@ The practical question we are answering:
     protein side.
 
 ## HOW (environment + commands)
-- **Hardware:** single NVIDIA H100. Reference run ~20h wall-clock, ~350 grad steps.
+- **Hardware:** single **NVIDIA A100-SXM4-80GB** (the Apheris docs say H100 — they're wrong; the VM has an A100). Reference run is ~9–12 h on A100 for the published protocol; budget the full hackathon day as 24 h.
 - **VM access** (SSH user `lyceum`, key `~/.ssh/team-4`; export `VM_IP` in your shell):
   - Shell: `ssh -i ~/.ssh/team-4 lyceum@$VM_IP`
   - Hub UI tunnel: `ssh -i ~/.ssh/team-4 -N -L 8081:localhost:8080 lyceum@$VM_IP`
@@ -60,6 +79,9 @@ The practical question we are answering:
 - Every experiment gets an entry in `memory.md` (run id, hyperparams, metric, notes).
 - Don't commit data, weights, or secrets (keys, BitWarden links). See `.gitignore`.
 - Prefer small, reviewable commits; open a PR for anything teammates should see.
+- VM working dir for the similarity lane: `~/biohackathon-work/` with
+  `.venv` (uv-managed Python 3.10), `cache/` (RCSB downloads), `similarity/`
+  (outputs). Outputs mirror back to repo `results/similarity/`.
 
 ## MEMORY PROTOCOL (survives compaction)
 1. **Session start:** read `memory.md` for current state before acting.
