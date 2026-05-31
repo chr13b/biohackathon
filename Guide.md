@@ -98,6 +98,27 @@ We embedded both sides of every complex:
 Combined into a joint similarity score (mean of pocket-cosine and
 ligand-Tanimoto), then projected onto a 2D map with **UMAP**.
 
+### What the cluster labels actually are (before any UMAP)
+
+The cluster numbers used everywhere upstream (the {0, 3, 4, 9–14}
+breakdown on Slide 4 and the per-complex cluster column on Slide 9b)
+**do not come from the UMAP** — UMAP is purely a 2-D visualisation.
+The labels are assigned by two independent clustering passes done
+directly on the embedding spaces:
+
+| Axis | Space | Distance | Algorithm | Setting | Output |
+|---|---|---|---|---|---|
+| **Ligand chemotype cluster** (slides 4, 7, 9b) | Morgan-r2-2048 ECFP-style circular fingerprints (2048 bits, radius 2) on the RDKit-canonicalised ligand SMILES | 1 − Tanimoto on the bit vectors | **Butina** (`rdkit.ML.Cluster.Butina.ClusterData`) | distance cutoff **0.65** (≡ Tanimoto > 0.35) — the chemotype-scaffold regime, not the rotamer-of-the-same-scaffold regime | 15 clusters across the 27 complexes |
+| **Pocket sub-cluster** (`esm_pocket_cluster` in `per_complex_similarity.csv`) | ESM-2 (35M, 12-layer) **pocket-only** mean-pooled embeddings of the 5 Å residues around each ligand | Euclidean (default) | **K-means** (`sklearn.cluster.KMeans`) | k = 4, `random_state=42`, `n_init=10` — small k by design, since all 27 proteins are the same PDE10A catalytic domain and the signal we want is sub-cluster construct/pocket variation | 4 sub-clusters |
+
+Only **after** these labels are assigned do we apply UMAP — and only
+for visualisation. UMAP runs on the same pocket-ESM matrix (cosine
+metric, `n_neighbors=15`, `min_dist=0.1`, `random_state=42`,
+`umap-learn`) and produces the 2-D coordinates; each point is then
+*coloured* by its Butina ligand cluster and *shaped* by its set
+(train / val / candidate). The UMAP layout itself never enters any
+downstream decision.
+
 This map is the basis for everything that follows: the augmentation
 picks, the rebalanced split, and the held-out selection.
 
