@@ -1,4 +1,4 @@
-# biohackathon — OpenFold3 × PDE10A
+# biohackathon — OpenFold3 × PDE10A: FoldMaxxers
 
 > **Apheris AI-for-Co-folding hackathon (Team 4) — May 2026.**
 > We fine-tune the public **OpenFold3 4.0.0** co-folding model on **human
@@ -42,13 +42,15 @@ Six of eight strictly improve on PL LDDT.
 | **Held-out eval** | 8 PDE10A complexes spanning 7 ligand chemotype clusters |
 | **Recipe** | LR=3e-4, warmup=50, ema=0.99, bf16, crop=384, **batch=4** — see [`configs/final_fine_tuned.json`](./configs/final_fine_tuned.json) |
 | **Compute** | 1× NVIDIA A100-80GB on the Apheris VM, ~3 h of training (35 checkpoints emitted) |
-| **Recovered checkpoint** | [`checkpoint_of_first_run/34-280.ckpt`](./checkpoint_of_first_run/) |
+| **Recovered checkpoint** | Deployed on the team's Apheris cluster as weight-version `4.0.0-team4-aug-5sonly-v1` (not stored in this repo) |
 | **Approach** | **Domain adaptation, not hyperparameter tuning** — we change *which* PDE10A complexes the model sees, not how it learns. |
 
 The training run started cleanly, produced 35 emitted checkpoints with
 monotonically improving validation PL LDDT, then died at step 280 from
 `[Errno 28] No space left on device` on the VM. The last checkpoint
-(`34-280.ckpt`) was recovered and is committed to the repo.
+(`34-280.ckpt`) was recovered, registered with the Hub as weight
+version `4.0.0-team4-aug-5sonly-v1`, and is now available directly
+from the team's Apheris cluster — no local file needed.
 
 ---
 
@@ -76,9 +78,6 @@ biohackathon/
 │   ├── README.md                  per-key rationale for the FT settings
 │   ├── final_fine_tuned.json      ← PRODUCTION config (the one we used)
 │   └── reference.json             published Apheris recipe (historical anchor)
-│
-├── checkpoint_of_first_run/
-│   └── 34-280.ckpt                ← recovered FT weights
 │
 ├── results/
 │   ├── runs/
@@ -148,18 +147,24 @@ uv pip install requests pandas               # minimum for path A
 # uv pip install rdkit transformers torch gemmi biotite umap-learn hdbscan matplotlib
 ```
 
-### (A) Skip training, just evaluate the recovered checkpoint (~30 min)
+### (A) Skip training, just evaluate the already-deployed checkpoint (~30 min)
+
+The fine-tuned weights are **already deployed on the team's Apheris
+cluster** as version `4.0.0-team4-aug-5sonly-v1` — no local checkpoint
+file is required. You only need cluster access (the `team-4` SSH key
+and the VM IP).
 
 ```sh
 # 1. Open the Hub UI tunnel and keep it open in one terminal
 bash scripts/tunnel.sh
 
-# 2. Register the FT weights with the Hub (in a second terminal)
-bash scripts/deploy_weights.sh \
-    checkpoint_of_first_run/34-280.ckpt \
-    4.0.0-team4-aug-5sonly-v1
+# 2. Confirm the FT weight version is visible (in a second terminal)
+curl -s http://localhost:8080/api/v1/models | grep "4.0.0-team4-aug-5sonly-v1"
+# If it isn't listed, re-run the deploy step on the cluster — see
+# scripts/README.md → "Re-registering the deployed FT weights".
 
-# 3. Run base + FT inference on the 8 eval complexes
+# 3. Run base + FT inference on the 8 eval complexes (against the
+#    cluster-resident weights — no local .ckpt file involved)
 python -m src.data.run_inference_8 \
     --eval-dir dataset/eval \
     --weight-version 4.0.0 \
@@ -177,6 +182,11 @@ diff <(sort results/runs/standard_openfold_performance.csv) \
 
 You should reproduce — up to seed noise from the diffusion sampler — the
 columns in `results/runs/{standard_openfold_performance,prediction_fine_tuned}.csv`.
+
+> The checkpoint file itself (`34-280.ckpt`, ~ several GB) lives on the
+> team's Apheris cluster under `weights_mount/fine-tuned/`. It is too
+> large to commit to GitHub, but team members with cluster access can
+> `scp` it locally if needed; ask the team lead for the exact path.
 
 ### (B) Full reproduction from scratch (~3 h FT + ~30 min eval)
 
@@ -244,9 +254,11 @@ Full method in [`html_files/report.html`](./html_files/report.html) §"Augmentat
 - `configs/final_fine_tuned.json` — the exact Settings JSON pasted into
   the Hub UI. `batch_size: 4`, `num_gradient_steps_per_epoch: 8`,
   `save_top_k: -1`.
-- `checkpoint_of_first_run/34-280.ckpt` — the last checkpoint emitted
-  before disk exhaustion. Step 280 = grad step 280, "34" = epoch index
-  on the dense `num_gradient_steps_per_epoch=8` cadence.
+- **Fine-tuned weights** — `34-280.ckpt`, the last checkpoint emitted
+  before disk exhaustion (grad step 280, epoch index 34 on the dense
+  `num_gradient_steps_per_epoch=8` cadence). The file is **not in this
+  repo** — it lives on the team's Apheris cluster and is reachable via
+  the Hub UI's Predict page under version `4.0.0-team4-aug-5sonly-v1`.
 - `results/runs/standard_openfold_performance.csv` — per-complex
   metrics for base OF3 4.0.0 on the 8 held-out, run 2026-05-31.
 - `results/runs/prediction_fine_tuned.csv` — per-complex metrics for
@@ -264,7 +276,7 @@ Full method in [`html_files/report.html`](./html_files/report.html) §"Augmentat
 ## Environment
 
 - **Hub VM**: NVIDIA A100-SXM4-80GB, Ubuntu 22.04, Apheris Hub on
-  `:8080` (the docs claim H100 — they're wrong).
+  `:8080`. 
 - **Hub URL** (via tunnel): `http://localhost:8081`.
 - **Local**: Python ≥ 3.10. Minimum deps (path A): `requests`, `pandas`.
   Full deps (path B + C):

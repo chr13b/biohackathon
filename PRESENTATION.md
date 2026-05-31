@@ -174,8 +174,10 @@ PL LDDT curve.
 
 The run launched cleanly, produced **35 checkpoints over ~3 hours**, then
 crashed at gradient step 280 with `[Errno 28] No space left on device`
-on the VM. We recovered the last checkpoint —
-`checkpoint_of_first_run/34-280.ckpt`.
+on the VM. We recovered the last checkpoint (`34-280.ckpt`) and
+**deployed it to the team's Apheris cluster** as weight version
+`4.0.0-team4-aug-5sonly-v1`, where it is reachable from the Hub UI's
+Predict-page dropdown. The `.ckpt` file is not in this repo (size).
 
 *Visual: a screenshot of the Hub UI Fine-tune progress view, or a
 chronology bar showing the 3-hour run with the disk-exhaust event marked.*
@@ -318,11 +320,14 @@ What we did:
 1. Pulled the per-checkpoint metric JSON via the Apheris REST API —
    `GET /api/v1/fine-tune/<job_id>` returns the full `metrics` array
    with PL LDDT / IP LDDT per emitted checkpoint.
-2. Copied the latest checkpoint (`34-280.ckpt`) off the VM before the
-   container restarted.
-3. Committed it to `checkpoint_of_first_run/` in this repo.
-4. Re-ran paired base + FT inference on the 8 held-out from the
-   recovered checkpoint — that produced `results/runs/*.csv`.
+2. Copied the latest checkpoint (`34-280.ckpt`) off the VM's output
+   volume into `weights_mount/fine-tuned/` before the container
+   restarted.
+3. Registered it as weight version `4.0.0-team4-aug-5sonly-v1` via
+   the Apheris `additional_weights.json` mechanism — it now appears
+   in the Hub UI's Predict-page dropdown.
+4. Re-ran paired base + FT inference on the 8 held-out — that produced
+   `results/runs/*.csv`.
 
 For a future re-run, the obvious fix is either `save_top_k: 3` (keep
 the best 3 only) or to point `/output` at the larger `/data` volume.
@@ -338,7 +343,7 @@ mapping from "what we did" to "what's committed" is one-to-one:
 |---|---|
 | The 35 train + 8 eval complexes uploaded to the Hub | `dataset/{train,eval}/` |
 | The Settings JSON pasted into the Hub UI | `configs/final_fine_tuned.json` |
-| The final checkpoint | `checkpoint_of_first_run/34-280.ckpt` |
+| The final checkpoint | Deployed on the team Apheris cluster as version `4.0.0-team4-aug-5sonly-v1` (not in this repo; ~ several GB) |
 | The base-OF3 numbers we compared against | `results/runs/standard_openfold_performance.csv` |
 | Our FT inference numbers | `results/runs/prediction_fine_tuned.csv` |
 | The similarity-lane pipeline that built the dataset | `src/data/*.py` |

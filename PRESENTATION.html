@@ -297,8 +297,11 @@
   <p>The run launched cleanly, produced <strong>35 checkpoints over ~3
      hours</strong>, then crashed at gradient step 280 with
      <code>[Errno 28] No space left on device</code> on the VM. We
-     recovered the last checkpoint —
-     <code>checkpoint_of_first_run/34-280.ckpt</code>.</p>
+     recovered the last checkpoint (<code>34-280.ckpt</code>) and
+     <strong>deployed it to the team's Apheris cluster</strong> as
+     weight version <code>4.0.0-team4-aug-5sonly-v1</code>, reachable
+     from the Hub UI's Predict-page dropdown. The <code>.ckpt</code>
+     file is not in this repo (size).</p>
 </section>
 
 <!-- ── Slide 9 ── -->
@@ -603,9 +606,15 @@
         (<code>GET /api/v1/fine-tune/&lt;job_id&gt;</code> returns the
         full <code>metrics</code> array).</li>
     <li>Copied the latest checkpoint
-        (<code>34-280.ckpt</code>) off the VM before the container
+        (<code>34-280.ckpt</code>) off the VM's output volume into
+        <code>weights_mount/fine-tuned/</code> before the container
         restarted.</li>
-    <li>Committed it to <code>checkpoint_of_first_run/</code>.</li>
+    <li>Registered it as weight version
+        <code>4.0.0-team4-aug-5sonly-v1</code> via the Apheris
+        <code>additional_weights.json</code> mechanism — it now
+        appears in the Hub UI's Predict-page dropdown. The
+        <code>.ckpt</code> file lives on the team cluster, not in
+        this repo.</li>
     <li>Re-ran paired base + FT inference on the 8 held-out from the
         recovered checkpoint — that produced
         <code>results/runs/*.csv</code>.</li>
@@ -623,7 +632,7 @@
     <tbody>
       <tr><td>The 35 train + 8 eval complexes uploaded to the Hub</td><td><code>dataset/{train,eval}/</code></td></tr>
       <tr><td>The Settings JSON pasted into the Hub UI</td><td><code>configs/final_fine_tuned.json</code></td></tr>
-      <tr><td>The final checkpoint</td><td><code>checkpoint_of_first_run/34-280.ckpt</code></td></tr>
+      <tr><td>The final checkpoint</td><td>Deployed on the team Apheris cluster as <code>4.0.0-team4-aug-5sonly-v1</code> (not in repo; ~ GB)</td></tr>
       <tr><td>The base-OF3 numbers we compared against</td><td><code>results/runs/standard_openfold_performance.csv</code></td></tr>
       <tr><td>Our FT inference numbers</td><td><code>results/runs/prediction_fine_tuned.csv</code></td></tr>
       <tr><td>The similarity-lane pipeline that built the dataset</td><td><code>src/data/*.py</code></td></tr>

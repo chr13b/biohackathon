@@ -7,9 +7,11 @@ here.
 
 ## The config we actually used: `final_fine_tuned.json`
 
-This is the **production config** for the FT job whose checkpoint sits at
-`checkpoint_of_first_run/34-280.ckpt` and whose held-out inference numbers
-live in `results/runs/prediction_fine_tuned.csv`.
+This is the **production config** for the FT job whose checkpoint is
+deployed on the team's Apheris cluster as weight version
+`4.0.0-team4-aug-5sonly-v1` (the recovered `34-280.ckpt`) and whose
+held-out inference numbers live in
+`results/runs/prediction_fine_tuned.csv`.
 
 ```json
 {
@@ -38,7 +40,7 @@ live in `results/runs/prediction_fine_tuned.csv`.
 | `warmup_steps` | 50 | Published recipe. |
 | `ema_decay` | 0.99 | Published recipe — exponential-moving-average anchoring to base weights to avoid catastrophic forgetting. |
 | `num_gradient_steps_per_epoch` | **8** | ApherisFold writes metrics + a checkpoint every `N` grad steps. 8 gives a dense PL-LDDT curve (a fresh checkpoint every ~5 minutes on the A100) without grinding to a halt on validation. Combined with `save_top_k: -1` this produced 35 checkpoints over ~3 hours of training. |
-| `save_top_k` | -1 | Keep every checkpoint — needed for the per-checkpoint PL LDDT / IP LDDT trajectory plot, and the reason we could recover `34-280.ckpt` after the disk crash. |
+| `save_top_k` | -1 | Keep every checkpoint — needed for the per-checkpoint PL LDDT / IP LDDT trajectory plot, and the reason we could recover the last checkpoint (`34-280.ckpt`) after the disk crash. |
 | `maximum_training_time` | 36000 (10 h) | Hard hackathon budget; the training actually died at ~3 h (`[Errno 28] No space left on device` on the VM), well within the cap. |
 | `metric_to_monitor` | `lddt_inter_protein_ligand` | = PL LDDT = LDDT-PLI; the primary pose-quality metric. |
 | `precision` | `bf16` | Required by the published recipe; matches the OF3 4.0.0 inference path. |

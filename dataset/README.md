@@ -5,7 +5,8 @@ run `team4-aug-5sonly-v1`. It is the 5S\*-only subset of the originally proposed
 44-train rebalanced split — the 9 non-5S\* augmentation entries (4LL\*, 4LM\*,
 4MRZ, 4MSA, 5C28) were dropped after they triggered `MonitorDatasetGeneration`
 failures, and were never seen by the model that produced the recovered
-checkpoint `checkpoint_of_first_run/34-280.ckpt`.
+checkpoint (`34-280.ckpt`), now deployed on the team's Apheris cluster as
+weight version `4.0.0-team4-aug-5sonly-v1`.
 
 ## Contents
 
@@ -59,8 +60,9 @@ see `manifest.json`.
 For the Apheris Hub UI:
 1. Drag-drop `train/*.cif` + `train/*_msa.a3m` into **Training Files**.
 2. Drag-drop `eval/*.cif` + `eval/*_msa.a3m` into **Validation Files**.
-3. Paste `configs/reference.json` into the **Settings** tab.
+3. Paste `configs/final_fine_tuned.json` into the **Settings** tab.
 4. Hit **Start fine-tuning**.
 
 The reproduced run will produce a checkpoint equivalent to (within seed
-variability) `checkpoint_of_first_run/34-280.ckpt`.
+variability) the `34-280.ckpt` deployed on the team's Apheris cluster
+as `4.0.0-team4-aug-5sonly-v1`.

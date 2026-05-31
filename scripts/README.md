@@ -56,19 +56,35 @@ laptop  →  (sim lane) → | filter  | → | augment  | → | rebalanced | → 
    - Choose weights: `openfold3 (4.0.0)`.
    - Drag-drop **all 70 files** in `dataset/train/` into **Training Files**.
    - Drag-drop **all 16 files** in `dataset/eval/` into **Validation Files**.
-   - Paste **`configs/reference.json`** into the **Settings** tab.
+   - Paste **`configs/final_fine_tuned.json`** into the **Settings** tab.
    - Hit **Start fine-tuning**.
 
-5. **Deploy the recovered checkpoint** (or any equivalent):
+5. **Deploy a fresh checkpoint** (only needed if you re-ran step 4 —
+   the production weights from our original run are *already deployed*
+   on the cluster as version `4.0.0-team4-aug-5sonly-v1`):
    ```sh
+   # If you have a local .ckpt from a fresh FT run:
    bash scripts/deploy_weights.sh \
-       checkpoint_of_first_run/34-280.ckpt \
+       /path/to/your/local/checkpoint.ckpt \
        4.0.0-team4-aug-5sonly-v1
    ```
-   This `scp`s the checkpoint to the VM, registers it in
+   This `scp`s the checkpoint to the VM under
+   `weights_mount/fine-tuned/`, registers it in
    `additional_weights.json`, and runs `./deploy_apherisfold diagnose`.
+   If the version string already exists it is replaced in-place.
 
-6. **Run inference + eval on the 8 held-out**:
+   To re-register an existing checkpoint that is already on the cluster
+   (e.g. the original `34-280.ckpt` after a Hub container restart),
+   ssh in and run the equivalent steps directly:
+   ```sh
+   bash scripts/connect.sh
+   # on the VM:
+   cd weights_mount
+   ./deploy_apherisfold && ./deploy_apherisfold diagnose
+   ```
+
+6. **Run inference + eval on the 8 held-out** (no local checkpoint
+   needed — both weight versions live on the cluster):
    ```sh
    # base reference (already on the Hub as openfold3 4.0.0)
    python -m src.data.run_inference_8 \
@@ -107,10 +123,30 @@ don't expose a CLI for either. These walkthroughs assume the tunnel is up.
 2. Choose weights: `openfold3 (4.0.0)`.
 3. Drag-drop `dataset/train/*` into **Training Files** and `dataset/eval/*`
    into **Validation Files**. Wait for all files to turn green.
-4. Paste `../configs/reference.json` into the **Settings** tab.
+4. Paste `../configs/final_fine_tuned.json` into the **Settings** tab.
 5. Hit **Start fine-tuning**. Track on the Fine-tune page.
 6. When checkpoints emit, download via the API:
    ```sh
    curl http://localhost:8080/api/v1/fine-tune/<job_id> > results/runs/<job_id>/job.json
    ```
    then extract `metrics[*]` for the per-checkpoint PL/IP LDDT trajectory.
+
+### Re-registering the deployed FT weights
+
+The production checkpoint `34-280.ckpt` was already deployed to the
+team cluster after the first run; it should appear in the Hub UI's
+Predict-page dropdown as version `4.0.0-team4-aug-5sonly-v1`. If a
+container restart hides it:
+
+```sh
+bash scripts/connect.sh
+# on the VM:
+cat weights_mount/additional_weights.json   # check the entry is present
+./deploy_apherisfold && ./deploy_apherisfold diagnose
+```
+
+If the entry is missing entirely, ssh in, locate the checkpoint under
+`weights_mount/fine-tuned/of3_4_0_0_team4_aug_5sonly_v1.pt` (the file
+the original `deploy_weights.sh` produced), then either re-create the
+`additional_weights.json` entry by hand or re-run `deploy_weights.sh`
+locally if you still have the `.ckpt` file.
