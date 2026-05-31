@@ -1,318 +1,55 @@
 {
+  "summary": {
+    "train_count": 35,
+    "eval_count": 8,
+    "msa_canonical_md5": "8569ccaf7d112e0d2699b3c04a1682f9",
+    "note": "Every _msa.a3m is a bit-identical copy of the canonical Apheris PDE10A catalytic-domain MSA. Source = 'train'/'val' are the original Apheris-provided complexes; source = 'augmentation_set' are real RCSB-deposited PDB structures (Q9Y233) that we added during the similarity lane and assembled with the canonical MSA."
+  },
   "train": [
-    {
-      "pdb_id": "4llj",
-      "source": "augmentation_set",
-      "cif_bytes": 622252,
-      "a3m_bytes": 3372533
-    },
-    {
-      "pdb_id": "4llk",
-      "source": "augmentation_set",
-      "cif_bytes": 633228,
-      "a3m_bytes": 3372533
-    },
-    {
-      "pdb_id": "4lm0",
-      "source": "augmentation_set",
-      "cif_bytes": 630123,
-      "a3m_bytes": 3372533
-    },
-    {
-      "pdb_id": "4lm1",
-      "source": "augmentation_set",
-      "cif_bytes": 639660,
-      "a3m_bytes": 3372533
-    },
-    {
-      "pdb_id": "4lm3",
-      "source": "augmentation_set",
-      "cif_bytes": 654279,
-      "a3m_bytes": 3372533
-    },
-    {
-      "pdb_id": "4lm4",
-      "source": "augmentation_set",
-      "cif_bytes": 631104,
-      "a3m_bytes": 3372533
-    },
-    {
-      "pdb_id": "4mrz",
-      "source": "augmentation_set",
-      "cif_bytes": 629396,
-      "a3m_bytes": 3372533
-    },
-    {
-      "pdb_id": "4msa",
-      "source": "augmentation_set",
-      "cif_bytes": 629701,
-      "a3m_bytes": 3372533
-    },
-    {
-      "pdb_id": "5c28",
-      "source": "augmentation_set",
-      "cif_bytes": 668539,
-      "a3m_bytes": 3372533
-    },
-    {
-      "pdb_id": "5sdy",
-      "source": "train",
-      "cif_bytes": 348619,
-      "a3m_bytes": 3372533
-    },
-    {
-      "pdb_id": "5se0",
-      "source": "val",
-      "cif_bytes": 1153691,
-      "a3m_bytes": 3372533
-    },
-    {
-      "pdb_id": "5se5",
-      "source": "val",
-      "cif_bytes": 1162895,
-      "a3m_bytes": 3372533
-    },
-    {
-      "pdb_id": "5se8",
-      "source": "augmentation_set",
-      "cif_bytes": 1173725,
-      "a3m_bytes": 3372533
-    },
-    {
-      "pdb_id": "5sea",
-      "source": "val",
-      "cif_bytes": 1159412,
-      "a3m_bytes": 3372533
-    },
-    {
-      "pdb_id": "5see",
-      "source": "val",
-      "cif_bytes": 322119,
-      "a3m_bytes": 3372533
-    },
-    {
-      "pdb_id": "5ses",
-      "source": "augmentation_set",
-      "cif_bytes": 1190323,
-      "a3m_bytes": 3372533
-    },
-    {
-      "pdb_id": "5sf4",
-      "source": "val",
-      "cif_bytes": 1157309,
-      "a3m_bytes": 3372533
-    },
-    {
-      "pdb_id": "5sfg",
-      "source": "val",
-      "cif_bytes": 1191861,
-      "a3m_bytes": 3372533
-    },
-    {
-      "pdb_id": "5sfh",
-      "source": "augmentation_set",
-      "cif_bytes": 1145578,
-      "a3m_bytes": 3372533
-    },
-    {
-      "pdb_id": "5sfi",
-      "source": "augmentation_set",
-      "cif_bytes": 1175713,
-      "a3m_bytes": 3372533
-    },
-    {
-      "pdb_id": "5sfl",
-      "source": "val",
-      "cif_bytes": 1152880,
-      "a3m_bytes": 3372533
-    },
-    {
-      "pdb_id": "5sfv",
-      "source": "augmentation_set",
-      "cif_bytes": 1165282,
-      "a3m_bytes": 3372533
-    },
-    {
-      "pdb_id": "5sg3",
-      "source": "augmentation_set",
-      "cif_bytes": 1211218,
-      "a3m_bytes": 3372533
-    },
-    {
-      "pdb_id": "5sg5",
-      "source": "train",
-      "cif_bytes": 1145196,
-      "a3m_bytes": 3372533
-    },
-    {
-      "pdb_id": "5sgk",
-      "source": "augmentation_set",
-      "cif_bytes": 1164380,
-      "a3m_bytes": 3372533
-    },
-    {
-      "pdb_id": "5sgl",
-      "source": "train",
-      "cif_bytes": 1174412,
-      "a3m_bytes": 3372533
-    },
-    {
-      "pdb_id": "5sh5",
-      "source": "augmentation_set",
-      "cif_bytes": 1110824,
-      "a3m_bytes": 3372533
-    },
-    {
-      "pdb_id": "5sh7",
-      "source": "augmentation_set",
-      "cif_bytes": 1149524,
-      "a3m_bytes": 3372533
-    },
-    {
-      "pdb_id": "5shu",
-      "source": "augmentation_set",
-      "cif_bytes": 1184067,
-      "a3m_bytes": 3372533
-    },
-    {
-      "pdb_id": "5si5",
-      "source": "train",
-      "cif_bytes": 1149737,
-      "a3m_bytes": 3372533
-    },
-    {
-      "pdb_id": "5si6",
-      "source": "augmentation_set",
-      "cif_bytes": 1172488,
-      "a3m_bytes": 3372533
-    },
-    {
-      "pdb_id": "5si7",
-      "source": "train",
-      "cif_bytes": 1158172,
-      "a3m_bytes": 3372533
-    },
-    {
-      "pdb_id": "5si8",
-      "source": "train",
-      "cif_bytes": 1157624,
-      "a3m_bytes": 3372533
-    },
-    {
-      "pdb_id": "5sig",
-      "source": "train",
-      "cif_bytes": 1155810,
-      "a3m_bytes": 3372533
-    },
-    {
-      "pdb_id": "5sih",
-      "source": "train",
-      "cif_bytes": 1219067,
-      "a3m_bytes": 3372533
-    },
-    {
-      "pdb_id": "5sik",
-      "source": "augmentation_set",
-      "cif_bytes": 1135753,
-      "a3m_bytes": 3372533
-    },
-    {
-      "pdb_id": "5siq",
-      "source": "train",
-      "cif_bytes": 1201106,
-      "a3m_bytes": 3372533
-    },
-    {
-      "pdb_id": "5siy",
-      "source": "train",
-      "cif_bytes": 1164655,
-      "a3m_bytes": 3372533
-    },
-    {
-      "pdb_id": "5siz",
-      "source": "augmentation_set",
-      "cif_bytes": 1174485,
-      "a3m_bytes": 3372533
-    },
-    {
-      "pdb_id": "5sj0",
-      "source": "augmentation_set",
-      "cif_bytes": 1112967,
-      "a3m_bytes": 3372533
-    },
-    {
-      "pdb_id": "5sjl",
-      "source": "val",
-      "cif_bytes": 1150195,
-      "a3m_bytes": 3372533
-    },
-    {
-      "pdb_id": "5sk4",
-      "source": "augmentation_set",
-      "cif_bytes": 1172426,
-      "a3m_bytes": 3372533
-    },
-    {
-      "pdb_id": "5skl",
-      "source": "augmentation_set",
-      "cif_bytes": 1157955,
-      "a3m_bytes": 3372533
-    },
-    {
-      "pdb_id": "5sko",
-      "source": "val",
-      "cif_bytes": 340681,
-      "a3m_bytes": 3372533
-    }
+    {"pdb_id": "5sdy", "source": "train", "cif_bytes": 348619, "a3m_bytes": 3372533},
+    {"pdb_id": "5se0", "source": "val", "cif_bytes": 1153691, "a3m_bytes": 3372533},
+    {"pdb_id": "5se5", "source": "val", "cif_bytes": 1162895, "a3m_bytes": 3372533},
+    {"pdb_id": "5se8", "source": "augmentation_set", "cif_bytes": 1173725, "a3m_bytes": 3372533},
+    {"pdb_id": "5sea", "source": "val", "cif_bytes": 1159412, "a3m_bytes": 3372533},
+    {"pdb_id": "5see", "source": "val", "cif_bytes": 322119, "a3m_bytes": 3372533},
+    {"pdb_id": "5ses", "source": "augmentation_set", "cif_bytes": 1190323, "a3m_bytes": 3372533},
+    {"pdb_id": "5sf4", "source": "val", "cif_bytes": 1157309, "a3m_bytes": 3372533},
+    {"pdb_id": "5sfg", "source": "val", "cif_bytes": 1191861, "a3m_bytes": 3372533},
+    {"pdb_id": "5sfh", "source": "augmentation_set", "cif_bytes": 1145578, "a3m_bytes": 3372533},
+    {"pdb_id": "5sfi", "source": "augmentation_set", "cif_bytes": 1175713, "a3m_bytes": 3372533},
+    {"pdb_id": "5sfl", "source": "val", "cif_bytes": 1152880, "a3m_bytes": 3372533},
+    {"pdb_id": "5sfv", "source": "augmentation_set", "cif_bytes": 1165282, "a3m_bytes": 3372533},
+    {"pdb_id": "5sg3", "source": "augmentation_set", "cif_bytes": 1211218, "a3m_bytes": 3372533},
+    {"pdb_id": "5sg5", "source": "train", "cif_bytes": 1145196, "a3m_bytes": 3372533},
+    {"pdb_id": "5sgk", "source": "augmentation_set", "cif_bytes": 1164380, "a3m_bytes": 3372533},
+    {"pdb_id": "5sgl", "source": "train", "cif_bytes": 1174412, "a3m_bytes": 3372533},
+    {"pdb_id": "5sh5", "source": "augmentation_set", "cif_bytes": 1110824, "a3m_bytes": 3372533},
+    {"pdb_id": "5sh7", "source": "augmentation_set", "cif_bytes": 1149524, "a3m_bytes": 3372533},
+    {"pdb_id": "5shu", "source": "augmentation_set", "cif_bytes": 1184067, "a3m_bytes": 3372533},
+    {"pdb_id": "5si5", "source": "train", "cif_bytes": 1149737, "a3m_bytes": 3372533},
+    {"pdb_id": "5si6", "source": "augmentation_set", "cif_bytes": 1172488, "a3m_bytes": 3372533},
+    {"pdb_id": "5si7", "source": "train", "cif_bytes": 1158172, "a3m_bytes": 3372533},
+    {"pdb_id": "5si8", "source": "train", "cif_bytes": 1157624, "a3m_bytes": 3372533},
+    {"pdb_id": "5sig", "source": "train", "cif_bytes": 1155810, "a3m_bytes": 3372533},
+    {"pdb_id": "5sih", "source": "train", "cif_bytes": 1219067, "a3m_bytes": 3372533},
+    {"pdb_id": "5sik", "source": "augmentation_set", "cif_bytes": 1135753, "a3m_bytes": 3372533},
+    {"pdb_id": "5siq", "source": "train", "cif_bytes": 1201106, "a3m_bytes": 3372533},
+    {"pdb_id": "5siy", "source": "train", "cif_bytes": 1164655, "a3m_bytes": 3372533},
+    {"pdb_id": "5siz", "source": "augmentation_set", "cif_bytes": 1174485, "a3m_bytes": 3372533},
+    {"pdb_id": "5sj0", "source": "augmentation_set", "cif_bytes": 1112967, "a3m_bytes": 3372533},
+    {"pdb_id": "5sjl", "source": "val", "cif_bytes": 1150195, "a3m_bytes": 3372533},
+    {"pdb_id": "5sk4", "source": "augmentation_set", "cif_bytes": 1172426, "a3m_bytes": 3372533},
+    {"pdb_id": "5skl", "source": "augmentation_set", "cif_bytes": 1157955, "a3m_bytes": 3372533},
+    {"pdb_id": "5sko", "source": "val", "cif_bytes": 340681, "a3m_bytes": 3372533}
   ],
   "eval": [
-    {
-      "pdb_id": "5sh0",
-      "source": "val",
-      "cif_bytes": 1144991,
-      "a3m_bytes": 3372533
-    },
-    {
-      "pdb_id": "5sh8",
-      "source": "val",
-      "cif_bytes": 1178862,
-      "a3m_bytes": 3372533
-    },
-    {
-      "pdb_id": "5shk",
-      "source": "val",
-      "cif_bytes": 1150192,
-      "a3m_bytes": 3372533
-    },
-    {
-      "pdb_id": "5shr",
-      "source": "val",
-      "cif_bytes": 1171529,
-      "a3m_bytes": 3372533
-    },
-    {
-      "pdb_id": "5sju",
-      "source": "val",
-      "cif_bytes": 1198341,
-      "a3m_bytes": 3372533
-    },
-    {
-      "pdb_id": "5ske",
-      "source": "val",
-      "cif_bytes": 1153003,
-      "a3m_bytes": 3372533
-    },
-    {
-      "pdb_id": "5skr",
-      "source": "val",
-      "cif_bytes": 1181813,
-      "a3m_bytes": 3372533
-    },
-    {
-      "pdb_id": "5sku",
-      "source": "val",
-      "cif_bytes": 1172581,
-      "a3m_bytes": 3372533
-    }
+    {"pdb_id": "5sh0", "source": "val", "cif_bytes": 1144991, "a3m_bytes": 3372533},
+    {"pdb_id": "5sh8", "source": "val", "cif_bytes": 1178862, "a3m_bytes": 3372533},
+    {"pdb_id": "5shk", "source": "val", "cif_bytes": 1150192, "a3m_bytes": 3372533},
+    {"pdb_id": "5shr", "source": "val", "cif_bytes": 1171529, "a3m_bytes": 3372533},
+    {"pdb_id": "5sju", "source": "val", "cif_bytes": 1198341, "a3m_bytes": 3372533},
+    {"pdb_id": "5ske", "source": "val", "cif_bytes": 1153003, "a3m_bytes": 3372533},
+    {"pdb_id": "5skr", "source": "val", "cif_bytes": 1181813, "a3m_bytes": 3372533},
+    {"pdb_id": "5sku", "source": "val", "cif_bytes": 1172581, "a3m_bytes": 3372533}
   ]
 }

@@ -1,10 +1,10 @@
 {
-  "batch_size": 32,
+  "batch_size": 1,
   "crop_size": 384,
   "data_seed": 42,
   "ema_decay": 0.99,
   "learning_rate": 0.0003,
-  "maximum_training_time": 86400,
+  "maximum_training_time": 36000,
   "metric_to_monitor": "lddt_inter_protein_ligand",
   "num_gradient_steps_per_epoch": 8,
   "precision": "bf16",
