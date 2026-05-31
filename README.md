@@ -14,8 +14,8 @@ rises** from 0.96 → 0.99 (no general-performance regression).
 This repo contains **everything needed to reproduce that result
 end-to-end**: the curated dataset, the exact training config, the
 recovered checkpoint, and the pipeline scripts. A presentation-friendly
-walk-through lives in [`PRESENTATION.md`](./PRESENTATION.md) and as a
-self-contained webpage in [`PRESENTATION.html`](./PRESENTATION.html); the
+walk-through lives in [`Guide.md`](./Guide.md) and as a
+self-contained webpage in [`Guide.html`](./Guide.html); the
 detailed data-lane writeup is in [`html_files/report.html`](./html_files/report.html).
 
 ---
@@ -59,8 +59,8 @@ from the team's Apheris cluster — no local file needed.
 ```
 biohackathon/
 ├── README.md                      ← you are here
-├── PRESENTATION.md                ← step-by-step narrative for the deck
-├── PRESENTATION.html              ← same content, self-contained webpage
+├── Guide.md                ← step-by-step narrative for the deck
+├── Guide.html              ← same content, self-contained webpage
 ├── CLAUDE.md                      ← stable project memory (env, why/what/how)
 ├── memory.md                      ← living session state
 │
@@ -270,7 +270,7 @@ Full method in [`html_files/report.html`](./html_files/report.html) §"Augmentat
   per-complex similarity CSV, augmentation picks, the split JSON.
 - `html_files/report.html` — the long-form data-lane writeup with
   embedded figures and the "real vs synthetic" clarification panel.
-- `PRESENTATION.md` / `PRESENTATION.html` — narrative walk-through
+- `Guide.md` / `Guide.html` — narrative walk-through
   suitable for slides, with the measured numbers folded in.
 
 ## Environment
