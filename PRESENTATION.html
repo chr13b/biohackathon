@@ -462,26 +462,106 @@
     </div>
   </div>
 
-  <h3 style="margin-top:18px;">Read this carefully</h3>
-  <ul>
-    <li><strong>The big wins are on the hardest cases.</strong>
-        <code>5sh8</code> flips from a 7.3 Å miss to a 0.33 Å recovery.
-        <code>5sh0</code> from 8.6 Å to 2.97 Å. <code>5ske</code> from
-        5 Å to sub-Å. These are exactly the chemotypes base OF3 most
-        struggled with.</li>
-    <li><strong>The already-easy cases stay easy.</strong>
-        <code>5skr</code>, <code>5sju</code> — both started near-perfect,
-        and the FT didn't break them.</li>
-    <li><strong>One case stays stuck.</strong> <code>5sku</code> is hard
-        for both; an obvious candidate for targeted v2 augmentation.</li>
-    <li><strong>General performance is preserved (and slightly better).</strong>
-        Protein Cα LDDT goes 0.96 → 0.99 — the FT did not damage
-        backbone-prediction quality, the standard concern with focused
-        fine-tuning.</li>
-  </ul>
   <p>Raw numbers in
      <code>results/runs/standard_openfold_performance.csv</code> (base) and
      <code>results/runs/prediction_fine_tuned.csv</code> (FT).</p>
+</section>
+
+<!-- ── Slide 9b — typology ── -->
+<section class="slide">
+  <span class="slide-num">Slide 9b — Reading the deltas</span>
+  <h2>Why the deltas look the way they do</h2>
+  <p>To explain the pattern we cross-referenced each held-out with its row
+     in <code>results/similarity/per_complex_similarity.csv</code> —
+     specifically the <strong>Tanimoto similarity of its ligand to the
+     nearest training ligand</strong> and the <strong>Butina ligand
+     cluster</strong> it sits in. That gives a clean four-part story.</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>PDB</th>
+        <th class="num">base PL</th>
+        <th class="num">FT PL</th>
+        <th class="num">base RMSD</th>
+        <th class="num">FT RMSD</th>
+        <th class="num">cluster</th>
+        <th class="num">T<sub>nearest-train-lig</sub></th>
+        <th>regime</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>5sh8</td><td class="num">0.41</td><td class="num">0.98</td><td class="num">7.27</td><td class="num">0.33</td><td class="num">0</td><td class="num">0.35 vs 5sdy</td><td class="delta-cell up">flip ↑</td></tr>
+      <tr><td>5sh0</td><td class="num">0.26</td><td class="num">0.72</td><td class="num">8.63</td><td class="num">2.97</td><td class="num">8</td><td class="num">0.22 vs 5sg5</td><td class="delta-cell up">flip ↑</td></tr>
+      <tr><td>5ske</td><td class="num">0.52</td><td class="num">0.92</td><td class="num">5.03</td><td class="num">0.81</td><td class="num">1</td><td class="num">0.33 vs 5sdy</td><td class="delta-cell up">flip ↑</td></tr>
+      <tr><td>5shk</td><td class="num">0.58</td><td class="num">0.64</td><td class="num">4.54</td><td class="num">2.79</td><td class="num">7</td><td class="num">0.17 vs 5sih</td><td>partial</td></tr>
+      <tr><td>5shr</td><td class="num">0.64</td><td class="num">0.69</td><td class="num">5.24</td><td class="num">5.29</td><td class="num">6</td><td class="num">0.21 vs 5sg5</td><td>partial</td></tr>
+      <tr><td>5skr</td><td class="num">0.90</td><td class="num">0.93</td><td class="num">0.79</td><td class="num">0.79</td><td class="num">2</td><td class="num">0.29 vs 5si8</td><td class="delta-cell flat">ceiling</td></tr>
+      <tr><td>5sju</td><td class="num">0.91</td><td class="num">0.94</td><td class="num">0.81</td><td class="num">0.84</td><td class="num">0</td><td class="num">0.35 vs 5sdy</td><td class="delta-cell flat">ceiling</td></tr>
+      <tr><td>5sku</td><td class="num">0.28</td><td class="num">0.28</td><td class="num">10.41</td><td class="num">10.44</td><td class="num">5</td><td class="num">0.23 vs 5sg5</td><td class="delta-cell down">floor</td></tr>
+    </tbody>
+  </table>
+
+  <h3 style="margin-top:18px;">1 · Flip (5sh8, 5sh0, 5ske · Δ PL +0.40 to +0.57)</h3>
+  <p>Base OF3 was misdocking these (RMSD 5–9 Å), but their chemotype
+     neighbourhood <em>is</em> present in the FT training set — the
+     augmentation lane specifically targeted clusters 0, 1, and 8 with
+     the 5S* picks. <code>5sh8</code> and <code>5ske</code> sit in
+     clusters 0/1, anchored by <code>5sdy</code> (Tanimoto 0.33–0.35 to
+     the held-out ligand). <code>5sh0</code> is in cluster 8 — the
+     rebalanced split deliberately covered it via augmentation. Base is
+     bad-but-not-catastrophic (RMSD &lt; 9 Å), so once the FT learns the
+     right pocket conformation it can pull the pose into the right basin.</p>
+
+  <h3>2 · Ceiling (5skr, 5sju · Δ PL +0.03)</h3>
+  <p>Both already had PL LDDT &gt; 0.90 and ligand RMSD &lt; 1 Å on base
+     OF3. PL LDDT saturates at 1.0; there is no room for an absolute
+     gain like +0.4 on a 0.91 baseline. The relevant outcome here is
+     <strong>preservation</strong>: focused fine-tuning often breaks
+     formerly-easy cases via catastrophic forgetting, and ours didn't —
+     both stayed within 0.04 Å of their original pose.</p>
+
+  <h3>3 · Partial (5shk, 5shr · Δ PL +0.05 to +0.06)</h3>
+  <p>These ligands sit in clusters 6 and 7, both originally uncovered
+     by the published 10-complex train and only partly filled by our
+     augmentation set. Their nearest-train Tanimoto is the lowest in
+     the panel (0.17–0.21) — the chemotype context is genuinely thin.
+     We still see modest movement (<code>5shk</code>'s RMSD drops 4.54
+     → 2.79 Å, a 1.75 Å correction; <code>5shr</code> is essentially
+     unchanged), consistent with "we gave the model just enough
+     chemotype exposure to nudge, not enough to flip." <strong>These
+     two are the prime candidates for a targeted v2 augmentation
+     pass</strong> — more cluster-6/7 entries from the 271 viable
+     RCSB pool we set aside.</p>
+
+  <h3>4 · Floor (5sku · Δ PL 0.00)</h3>
+  <p>The only case where FT made no difference at all. Its ligand —
+     <code>CCOC1CC(F)CCC1C1NC(CCOC2CCC(CC(OC)C(O)O)C3CCCCC23)C(C)O1</code>
+     — is the largest and most conformationally flexible in the eval
+     panel: two fused cyclohexane systems linked by multi-atom ether
+     chains. Base OF3 is 10.4 Å off — the prediction is in the wrong
+     pose basin entirely. The nearest-train Tanimoto is 0.23, and
+     cluster 5 was one of the more weakly covered clusters in our
+     augmentation pass.</p>
+  <p><strong>Working hypothesis:</strong> when (a) the chemotype is
+     sparsely represented, (b) the ligand has many rotatable bonds,
+     and (c) the base prediction is far off, a 35-complex FT doesn't
+     carry enough signal to relocate the pose. Fixing this case probably
+     needs either a dedicated augmentation pass focused on cluster 5 /
+     large-flexible PDE10A inhibitors (the 2OU*, 2Y0J, 3UI7, 3WS9
+     series we filtered out as MSA-incompatible) or a coarse-pose
+     initialisation seed.</p>
+
+  <h3>The general rule</h3>
+  <p>Improvement is <strong>bounded below by how lost base OF3 was</strong>
+     <em>and</em> <strong>above by how well the held-out chemotype is
+     represented in the FT data</strong>. The intersection of those two
+     windows is where focused fine-tuning helps most — exactly where
+     our three biggest wins live.</p>
+  <p>And: <strong>protein Cα LDDT goes 0.96 → 0.99</strong> across all
+     eight complexes, so the FT did not damage backbone-prediction
+     quality — the standard concern with focused fine-tuning is
+     addressed.</p>
 </section>
 
 <!-- ── Slide 10 ── -->

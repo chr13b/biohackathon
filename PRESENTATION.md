@@ -207,20 +207,79 @@ Per-complex (sorted by base PL LDDT):
 | 5skr | 0.90 | 0.93 | +0.03 | 0.79 | 0.79 | 0.00 |
 | 5sju | 0.91 | 0.94 | +0.03 | 0.81 | 0.84 | +0.03 |
 
-Read this carefully:
-- **The big wins are on the hardest cases.** `5sh8` flips from a 7.3 Å
-  miss to a 0.33 Å recovery. `5sh0` from 8.6 Å to 2.97 Å. `5ske` from
-  5 Å to sub-Å. These are the chemotypes base OF3 most struggled with.
-- **The already-easy cases stay easy.** `5skr`, `5sju` — both started
-  near-perfect, and the FT didn't break them.
-- **One case stays stuck.** `5sku` is hard for both; an obvious
-  candidate for targeted v2 augmentation.
+Numbers live in `results/runs/standard_openfold_performance.csv` (base)
+and `results/runs/prediction_fine_tuned.csv` (FT).
+
+### Why the deltas look the way they do — a four-part typology
+
+To explain the pattern we cross-referenced each held-out with its row in
+`results/similarity/per_complex_similarity.csv` — specifically the
+**Tanimoto similarity of its ligand to the nearest training ligand**
+and the **Butina ligand cluster** it sits in. That gives a clean story:
+
+| PDB | base PL | FT PL | base RMSD | FT RMSD | cluster | T(nearest-train-ligand) | regime |
+|---|---:|---:|---:|---:|---:|---:|---|
+| 5sh8 | 0.41 | 0.98 | 7.27 | 0.33 | 0 | 0.35 (vs `5sdy`) | **flip ↑** |
+| 5sh0 | 0.26 | 0.72 | 8.63 | 2.97 | 8 | 0.22 (vs `5sg5`) | **flip ↑** |
+| 5ske | 0.52 | 0.92 | 5.03 | 0.81 | 1 | 0.33 (vs `5sdy`) | **flip ↑** |
+| 5shk | 0.58 | 0.64 | 4.54 | 2.79 | 7 | 0.17 (vs `5sih`) | partial |
+| 5shr | 0.64 | 0.69 | 5.24 | 5.29 | 6 | 0.21 (vs `5sg5`) | partial |
+| 5skr | 0.90 | 0.93 | 0.79 | 0.79 | 2 | 0.29 (vs `5si8`) | **ceiling** |
+| 5sju | 0.91 | 0.94 | 0.81 | 0.84 | 0 | 0.35 (vs `5sdy`) | **ceiling** |
+| 5sku | 0.28 | 0.28 | 10.41 | 10.44 | 5 | 0.23 (vs `5sg5`) | **floor** |
+
+1. **Flip (5sh8, 5sh0, 5ske, Δ PL +0.40 to +0.57).** Base OF3 was
+   misdocking these (RMSD 5–9 Å) but their chemotype neighbourhood
+   *is* present in the FT training set — the augmentation lane
+   specifically targeted clusters 0, 1, and 8 with the 5S\* picks.
+   `5sh8` and `5ske` sit in clusters 0/1 which are anchored by
+   `5sdy` (Tanimoto 0.33–0.35 to the held-out ligand). `5sh0` is in
+   cluster 8 which the rebalanced split deliberately covered via
+   augmentation. In all three cases, base is bad-but-not-catastrophic
+   (RMSD < 9 Å), so once the FT learns the right pocket conformation
+   it pulls the pose into the right basin.
+2. **Ceiling (5skr, 5sju, Δ PL +0.03).** Both already had PL LDDT > 0.90
+   and ligand RMSD < 1 Å on base OF3. PL LDDT saturates at 1.0; there
+   is no room for an absolute gain like +0.4 on a 0.91 baseline. The
+   relevant outcome here is **preservation**: focused fine-tuning
+   often breaks formerly-easy cases via catastrophic forgetting, and
+   ours didn't. Both stayed within 0.04 Å of their original pose.
+3. **Partial (5shk, 5shr, Δ PL +0.05 to +0.06).** These ligands sit in
+   clusters 6 and 7, both originally uncovered by the published 10
+   train and only partly filled by our augmentation set. Their
+   nearest-train ligand Tanimoto is the lowest in the panel
+   (0.17–0.21) — the chemotype context is genuinely thin. We still see
+   modest movement (5shk's RMSD drops from 4.54 → 2.79 Å, a 1.75 Å
+   correction; 5shr is essentially unchanged), consistent with "we
+   gave the model just enough chemotype exposure to nudge, not
+   enough to flip." These two are the prime candidates for **targeted
+   v2 augmentation** — more cluster-6/7 entries from the 271 viable
+   RCSB pool we set aside.
+4. **Floor (5sku, Δ PL 0.00).** The only case where FT made no
+   difference at all. Its ligand
+   (`CCOC1CC(F)CCC1C1NC(CCOC2CCC(CC(OC)C(O)O)C3CCCCC23)C(C)O1`) is
+   the largest and most conformationally flexible in the eval panel —
+   two fused cyclohexane systems linked by multi-atom ether chains.
+   Base OF3 is 10.4 Å off — the prediction is in the wrong pose basin
+   entirely. The nearest-train Tanimoto is 0.23, and cluster 5 was
+   one of the more weakly covered clusters in our augmentation pass.
+   The hypothesis: when (a) the chemotype is sparsely represented,
+   (b) the ligand has many rotatable bonds, and (c) the base prediction
+   is far off, a 35-complex FT doesn't carry enough signal to relocate
+   the pose. Fixing this case probably needs either a dedicated
+   augmentation pass focused on cluster 5 / large-flexible PDE10A
+   inhibitors (the 2OU\*, 2Y0J, 3UI7, 3WS9 series we filtered out as
+   MSA-incompatible) or a coarse-pose initialisation seed.
+
+**The general rule the typology produces:** improvement is bounded
+below by how lost base OF3 was *and* above by how well the held-out
+chemotype is represented in the FT data. The intersection of those
+two windows is where focused fine-tuning helps most — exactly where
+our three biggest wins live.
+
 - **General performance is preserved (and slightly better).** Protein
   Cα LDDT goes 0.96 → 0.99 — the FT did not damage the backbone
   prediction quality, the standard concern with focused fine-tuning.
-
-Numbers live in `results/runs/standard_openfold_performance.csv` (base)
-and `results/runs/prediction_fine_tuned.csv` (FT).
 
 *Visual: paired bar chart, one bar pair per held-out, sorted by base
 PL LDDT ascending so the wins are visually obvious. PRESENTATION.html
