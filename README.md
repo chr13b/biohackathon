@@ -1,6 +1,6 @@
-# biohackathon — OpenFold3 × PDE10A: FoldMaxxers
+# OpenFold3 × PDE10A
 
-> **Apheris AI-for-Co-folding hackathon (Team 4) — May 2026.**
+> **Apheris AI-for-Co-folding hackathon**
 > We fine-tune the public **OpenFold3 4.0.0** co-folding model on **human
 > PDE10A** (UniProt `Q9Y233`) and ask whether distribution-aware data
 > augmentation can move the pose-quality needle on held-out complexes.
