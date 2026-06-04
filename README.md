@@ -54,6 +54,57 @@ from the team's Apheris cluster — no local file needed.
 
 ---
 
+## Approach in a nutshell
+
+We treated the task as a **domain-adaptation problem on the data side**,
+not a hyperparameter-tuning problem on the model side. With only ~24 h
+of GPU budget and a full fine-tune costing ~3 h on the A100, a single
+data intervention beats a noisy hyperparameter sweep every time. The
+question we actually asked was: *which 35 PDE10A complexes, if seen
+during fine-tuning, would best teach OpenFold3 to model held-out PDE10A
+complexes?*
+
+The pipeline runs in five stages:
+
+1. **Characterise the 27 organiser-provided complexes.** Parse each CIF;
+   extract the catalytic-domain sequence, the 5 Å binding pocket, and
+   the ligand SMILES. Embed both axes — protein pocket via
+   **ESM-2 (35 M, 12-layer)**, ligand via **Morgan-r2-2048**
+   fingerprints — and compute pairwise similarities (cosine for
+   protein, Tanimoto for ligand).
+2. **Cluster on the chemistry side.** Run **Butina** clustering
+   (cutoff 0.65) on the ligand Tanimoto matrix, which reveals that the
+   published 10/17 split is almost adversarially chemotype-stratified
+   — 6 of 7 val ligand clusters have no training counterpart at all.
+3. **Augment from the PDB.** Pull all **359 RCSB entries** for UniProt
+   `Q9Y233`, filter to 271 that share Apheris's canonical PDE10A MSA
+   (a key finding: all 27 organiser a3m files are bit-identical, so
+   adding any other PDE10A entry is *MSA-free*), score each by joint
+   pocket + ligand similarity to our 27, and pick a chemotype-balanced
+   set of 16 5S\* fragment-screen entries that cover the previously
+   uncovered val ligand clusters.
+4. **Rebalance the split.** Move 9 of the more in-distribution val
+   entries into train and assemble a final **35-train / 8-eval** split
+   in which every eval point sits in a ligand cluster the training
+   set now sees. The 8 held-out span 7 distinct ligand clusters so
+   the eval still measures across-chemotype generalisation, not
+   memorisation.
+5. **Fine-tune and evaluate.** Run a single OpenFold3 fine-tune
+   through the Apheris Hub UI with the production config in
+   [`configs/final_fine_tuned.json`](./configs/final_fine_tuned.json)
+   (LR 3e-4, batch 4, EMA 0.99, bf16, crop 384). Paired inference on
+   the 8 held-out for base vs FT produces the deltas in the headline
+   table.
+
+For the slide-by-slide story behind each stage — including the
+per-complex typology that explains why three eval complexes flipped,
+two saturated at the metric ceiling, two moved partially, and one
+stayed stuck — see [`Guide.md`](./Guide.md) (or
+[`Guide.html`](./Guide.html) for the same content as a self-contained
+webpage with the headline bar charts rendered inline).
+
+---
+
 ## Repo layout
 
 ```
